@@ -43,7 +43,7 @@ Make a histogram with all the data.
 
 --
 
-The distribution of the the limpet size data shows that it is skewed between 20 to 40 mm.
+The limpet size data shows a skewed distribution. The shell length that occurs the most (mode) is 30 mm.
 
 ```{r}
 ggplot(SizeData_2022_2025) +
@@ -70,8 +70,8 @@ ggplot(SizeData_2022_2025) +
 We know our minimum size cut-off varied in different years of the surveys, and some teams just didn't follow directions. Filter out any observations smaller than 15 mm.
 
 ```{r}
-SizeData_2022_2025 <- SizeData_2022_2025 |> 
-  filter(shell_length_mm < 15)
+SizeData_2022_2025 <- SizeData_2022_2025 |>  
+  filter(shell_length_mm > 15)
 
 SizeData_2022_2025
 ```
@@ -82,12 +82,14 @@ Make a table using `select()` and `distinct()` to only show the length of each t
 
 ```{r}
 TransectLengths <- SizeData_2022_2025 |> 
-  select(transect_num, site) |> 
-  distinct()
+  select(transect_length_m, site, transect_num) |> 
+  distinct(transect_length_m, site)
   
   
 
 TransectLengths
+
+#is this asking for transect number, transect length, or both???????SHOULD I RENAME TRANSECT LENGTH TO TRANSECT NUM????????????????????????
 ```
 
 Visualize the transect lengths two different ways.
@@ -99,17 +101,24 @@ Visualize the transect lengths two different ways.
 - combine the two so that the points are red and overlay the boxplot graph.
 
 ```{r}
-TransectLengths |> ggplot(TransectLengths) +
-  aes(site, transect_length_mm)
+TransectLengthsbox <- TransectLengths |> ggplot(TransectLengths) |> 
+  aes(x = site, y = transect_length_m) |> 
   geom_boxplot()
 
-  
+#why doesnt a boxplot show???????????????????????warning comes up?????????????????
 
-TransectLengths |> ggplot() +
+TransectLengthspoint <- TransectLengths |> ggplot(TransectLengths) |> 
+  aes(x = site, y = transect_length_m) |> 
   geom_point()
 
-TransectLengths |> ggplot() +
+#warning comes up???????????????????
 
+TransectLengths |> ggplot(TransectLengths) |> 
+  aes (x = site, y = transect_length_m) |> 
+  geom_point(fill = 'red') |> 
+  geom_boxplot()
+  
+#how to overlay two graphs??? shwould they be seperate names then mashed together?????????????????
   
   
 ```
@@ -123,7 +132,11 @@ ANSWER: Our methods have been a little inconsistent. We used different methods a
 Graph 1:
 
 ```{r}
+ggplot(SizeData_2022_2025) +
+  aes(x = shell_length_mm) +
+  geom_density()
 
+#?????????????????????
 ```
 
 This shows:
