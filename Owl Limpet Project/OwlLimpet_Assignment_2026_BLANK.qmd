@@ -101,24 +101,32 @@ Visualize the transect lengths two different ways.
 - combine the two so that the points are red and overlay the boxplot graph.
 
 ```{r}
-TransectLengthsbox <- TransectLengths |> ggplot(TransectLengths) |> 
-  aes(x = site, y = transect_length_m) |> 
+TransectLengthsbox <- TransectLengths |> 
+  ggplot() +  
+  aes(x = site, y = transect_length_m) +
   geom_boxplot()
 
-#why doesnt a boxplot show???????????????????????warning comes up?????????????????
+TransectLengthsbox
 
-TransectLengthspoint <- TransectLengths |> ggplot(TransectLengths) |> 
-  aes(x = site, y = transect_length_m) |> 
+
+TransectLengthspoint <- TransectLengths |> 
+  ggplot() + 
+  aes(x = site, y = transect_length_m) + 
   geom_point()
 
-#warning comes up???????????????????
+TransectLengthspoint
 
-TransectLengths |> ggplot(TransectLengths) |> 
-  aes (x = site, y = transect_length_m) |> 
-  geom_point(fill = 'red') |> 
-  geom_boxplot()
+
+
+TransectLengthsboxpoint <- TransectLengths |> 
+  ggplot() + 
+  aes (x = site, y = transect_length_m) + 
+  geom_point(color = "purple") +
+  geom_boxplot(fill = "red")
   
-#how to overlay two graphs??? shwould they be seperate names then mashed together?????????????????
+TransectLengthsboxpoint
+
+
   
   
 ```
@@ -133,8 +141,8 @@ Graph 1:
 
 ```{r}
 ggplot(SizeData_2022_2025) +
-  aes(x = shell_length_mm) +
-  geom_density()
+  aes(x = transect_length_m) +
+  geom_bar()
 
 #?????????????????????
 ```
@@ -144,6 +152,10 @@ This shows:
 Graph 2:
 
 ```{r}
+ggplot(SizeData_2022_2025) +
+  aes(x = habitat) +
+  geom_bar()
+
 
 ```
 
@@ -154,7 +166,10 @@ This shows:
 For the population density analysis, we will analyze data from Shaws Cove, Heisler Park, and Treasure Cove. Create a data frame that excludes the Corona del Mar data, as that site did not have area measured.
 
 ```{r}
-No_CDM_Sizes <- SizeData_2022_2025 |> 
+No_CDM_Sizes <- SizeData_2022_2025 |>
+  filter(site = "Corona del Mar")
+  
+  
 ```
 
 #### 2.1. How many limpets did we measure at each site in each year for sizes?
