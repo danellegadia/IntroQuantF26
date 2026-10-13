@@ -201,7 +201,7 @@ Make a new dataframe out of the `No_CDM_Sizes` that has a column called *density
 ```{r}
 Limpet_Density <- No_CDM_Sizes |> 
   mutate(density 
-         = shell_length_mm/transect_length_m) |>  
+         = shell_length_mm/(transect_length_m + 2)) |>  
            group_by(year)
   
 
@@ -215,9 +215,14 @@ Do you see any patterns just from examining this table of values?
 What was the mean limpets per square meter across all sites? And the standard deviation? And standard error?
 
 ```{r}
-Limpet_Density |> 
+Limpet_Density |>
+  summarize(
+    mean_pop = mean (density),
+    sd_pop = sd (density),
+    se_pop = sd(density)/sqrt(2))
 
 
+    
 ```
 
 Now create a summary table in which you calculate separate mean and standard deviation for each site and year (Shaws vs. Heisler vs. Treasure Cove)? What was the standard error? Round the mean and standard error to one decimal place. (look up the `round()` function!)
@@ -225,11 +230,18 @@ Now create a summary table in which you calculate separate mean and standard dev
 ```{r}
 # use summarize() to calculate the mean and standard error (sd/sqrt(n)) for the two locations
 LimpetPopSummary <- Limpet_Density |>
+  group_by(site, year) |> 
+  summarize(
+    mean_population = mean(density),
+    sd_population = sd(density),
+    n = n(),
+    se_population = sd(density)/sqrt(n)) |> 
+  mutate_at(vars(mean_population, sd_population, se_population),
+            .funs = round, 2)
   
-  
-  
-  
- 
+
+LimpetPopSummary
+
 # Display your summary nicely using kable(). 
 knitr::kable(LimpetPopSummary)
 ```
@@ -239,7 +251,13 @@ knitr::kable(LimpetPopSummary)
 Boxplot, using the `Limpet_density` object, using fill for year. Label the Y-axis to say "Limpets per square meter".
 
 ```{r}
-Limpet_Density |> ggplot() + 
+Limpet_Density |> 
+  ggplot() +
+  aes(x= density, 
+      fill = year) +
+  geom_boxplot() +
+  labs(y = "Limpets per square meter")
+  
  
   
 ```
@@ -247,8 +265,10 @@ Limpet_Density |> ggplot() +
 A column plot with errorbars, and fill = year, using your new `LimpetPopSummary` object. Make sure to label the y-axis appropriately.
 
 ```{r}
-LimpetPopSummary |> ggplot()+
- 
+LimpetPopSummary |> 
+  ggplot() +
+  aes() +
+
   
   
 
