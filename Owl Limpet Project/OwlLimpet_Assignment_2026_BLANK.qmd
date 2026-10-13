@@ -121,8 +121,8 @@ TransectLengthspoint
 TransectLengthsboxpoint <- TransectLengths |> 
   ggplot() + 
   aes (x = site, y = transect_length_m) + 
-  geom_point(color = "purple") +
-  geom_boxplot(fill = "red")
+  geom_point(color = "red") +
+  geom_boxplot(fill = "blue")
   
 TransectLengthsboxpoint
 
@@ -167,9 +167,9 @@ For the population density analysis, we will analyze data from Shaws Cove, Heisl
 
 ```{r}
 No_CDM_Sizes <- SizeData_2022_2025 |>
-  filter(site = "Corona del Mar")
-  
-  
+  filter(site !="Corona del Mar")
+
+No_CDM_Sizes
 ```
 
 #### 2.1. How many limpets did we measure at each site in each year for sizes?
@@ -177,16 +177,21 @@ No_CDM_Sizes <- SizeData_2022_2025 |>
 Use nrow(), group_by() and count() to tally the limpet observations at each transect. We used the same transect numbers at Shaws and Heisler, so group_by() site as well.
 
 ```{r}
+No_CDM_Sizes |> 
+  nrow()
+
+# How many did we measure total, across both sites? 1746
+No_CDM_Sizes |> 
+  group_by(site) |> 
+  count()
+
+## How many did we measure at each site? Heisler Park - 484, Shaws Cove 793, Treasure Cove - 469
+No_CDM_Sizes |> 
+  group_by(transect_num) |> 
+  count()
+
+# How many did we measure in each transect?  T1 - 86, T2 - 245, T3 - 188, T4 - 128, T5 - 219, T6 - 297, T7 - 85, T8 - 169, T9 - 160, T10 - 137
 No_CDM_Sizes
-
-# How many did we measure total, across both sites?
-No_CDM_Sizes |> 
-
-## How many did we measure at each site? 
-No_CDM_Sizes |> 
-
-# How many did we measure in each transect? 
-No_CDM_Sizes |> 
 ```
 
 #### 2.2 What was the limpet density (i.e., limpets per square meter) for each transect?
@@ -195,7 +200,9 @@ Make a new dataframe out of the `No_CDM_Sizes` that has a column called *density
 
 ```{r}
 Limpet_Density <- No_CDM_Sizes |> 
-  
+  mutate(density 
+         = shell_length_mm/transect_length_m) |>  
+           group_by(year)
   
 
 Limpet_Density
