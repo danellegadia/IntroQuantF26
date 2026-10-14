@@ -219,7 +219,8 @@ Limpet_Density |>
   summarize(
     mean_pop = mean (density),
     sd_pop = sd (density),
-    se_pop = sd(density)/sqrt(2))
+    n = n (),
+    se_pop = sd(density)/sqrt(n))
 
 
     
