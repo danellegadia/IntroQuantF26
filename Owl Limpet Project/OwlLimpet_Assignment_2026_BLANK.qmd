@@ -200,10 +200,12 @@ Make a new dataframe out of the `No_CDM_Sizes` that has a column called *density
 
 ```{r}
 Limpet_Density <- No_CDM_Sizes |> 
+  group_by(site, year, transect_num, transect_length_m) |> 
+  count(transect_length_m) |> 
   mutate(density 
-         = shell_length_mm/(transect_length_m + 2)) |>  
-           group_by(year)
+       = sum(n)/(transect_length_m * 2))
   
+
 
 Limpet_Density
 ```
@@ -215,11 +217,12 @@ Do you see any patterns just from examining this table of values?
 What was the mean limpets per square meter across all sites? And the standard deviation? And standard error?
 
 ```{r}
-Limpet_Density |>
+Limpet_Density |> ungroup() |> 
   summarize(
-    mean_pop = mean (density),
-    sd_pop = sd (density),
-    se_pop = sd(density)/sqrt(2))
+    mean_pop = mean (density, na.rm = TRUE),
+    sd_pop = sd (density, na.rm = TRUE),
+    n = n(),
+    se_pop = sd(density)/sqrt(n))
 
 
     
@@ -253,7 +256,8 @@ Boxplot, using the `Limpet_density` object, using fill for year. Label the Y-axi
 ```{r}
 Limpet_Density |> 
   ggplot() +
-  aes(x= density, 
+  aes(x= site, 
+      y = density,  
       fill = year) +
   geom_boxplot() +
   labs(y = "Limpets per square meter")
@@ -265,19 +269,35 @@ Limpet_Density |>
 A column plot with errorbars, and fill = year, using your new `LimpetPopSummary` object. Make sure to label the y-axis appropriately.
 
 ```{r}
-LimpetPopSummary |> 
-  ggplot() +
-  aes() +
+LimpetPopSummary |> ggplot() +
+  aes(x = site, 
+      y = mean_population,
+      fill = year) +
+  geom_col(position = position_dodge()) +
+  geom_errorbar(aes(ymin = mean_population - se_population, 
+                    ymax = mean_population + se_population), 
+                position = position_dodge(0.9), 
+                width = 0.2)+
+  labs(y = "Limpets per square meter")
+  
 
-  
-  
+
+
+
 
 ```
 
 A `geom_point()` or `geom_jitter()`plot to visualize individual transect density observations
 
 ```{r}
-Limpet_Density |> ggplot() + 
+LimpetPopSummary |> ggplot() +
+  aes(x = site, 
+      y = mean_population,
+      fill = year) +
+  geom_jitter()+
+  labs(y = "Limpets per square meter")
+  
+  
   
   
   
@@ -304,6 +324,10 @@ Is it roughly the same so that we can compare? Is it enough to run a statistical
 
 ```{r}
 Limpet_Density |> 
+  group_by (transect_length_m, ) 
+
+#41
+
 ```
 
 #### 2.6. Does average number of owl limpets per square meter differ significantly between Heisler Park and Shaws Cove?
@@ -313,9 +337,15 @@ Filter the data to only include those sites before putting it into the `t.test()
 ```{r t-test}
 # run a t-test on your count data from each site (Limpet_Density)
 ShawsHeislerDensity <- Limpet_Density |> 
+  filter(site == "ShawsCove" & site == "HeislerPark") |> 
+  select(site, shell_length_mm, transect_length_m,year,density)
+  
 
 
-t.test(     , data = ShawsHeislerDensity)
+t.test(x = density, 
+       mu
+       data = ShawsHeislerDensity)
+
 
 ```
 
