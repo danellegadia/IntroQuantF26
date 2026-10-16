@@ -324,7 +324,7 @@ Is it roughly the same so that we can compare? Is it enough to run a statistical
 
 ```{r}
 Limpet_Density |> 
-  group_by (transect_length_m, ) 
+  group_by (transect_length_m, site, year) 
 
 #41
 
@@ -337,13 +337,15 @@ Filter the data to only include those sites before putting it into the `t.test()
 ```{r t-test}
 # run a t-test on your count data from each site (Limpet_Density)
 ShawsHeislerDensity <- Limpet_Density |> 
-  filter(site == "ShawsCove" & site == "HeislerPark") |> 
-  select(site, shell_length_mm, transect_length_m,year,density)
+  filter(density, year, site, transect_length_m,transect_num) |>   
+  select(site == ShawsCove, HeislerPark)
   
 
+ShawsHeislerDensity
 
-t.test(x = density, 
-       mu
+
+t.test(x = site, 
+       mu = mean(density), 
        data = ShawsHeislerDensity)
 
 
