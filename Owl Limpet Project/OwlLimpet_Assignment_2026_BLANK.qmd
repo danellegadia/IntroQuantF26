@@ -337,7 +337,7 @@ Filter the data to only include those sites before putting it into the `t.test()
 ```{r t-test}
 # run a t-test on your count data from each site (Limpet_Density)
 ShawsHeislerDensity <- Limpet_Density |> 
-  select(site != "TreasureCove")
+  filter(!site == "TreasureCove")
 #still shows treasurecove site
 
 view(ShawsHeislerDensity)
