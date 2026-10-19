@@ -294,7 +294,7 @@ LimpetPopSummary |> ggplot() +
   aes(x = site, 
       y = mean_population,
       fill = year) +
-  geom_jitter()+
+  geom_point()+
   labs(y = "Limpets per square meter")
   
   
@@ -324,7 +324,7 @@ Is it roughly the same so that we can compare? Is it enough to run a statistical
 
 ```{r}
 Limpet_Density |> 
-  group_by (transect_length_m, site, year) 
+  group_by (transect_num, transect_length_m, site, year)
 
 #41
 
@@ -337,15 +337,13 @@ Filter the data to only include those sites before putting it into the `t.test()
 ```{r t-test}
 # run a t-test on your count data from each site (Limpet_Density)
 ShawsHeislerDensity <- Limpet_Density |> 
-  filter(density, year, site, transect_length_m,transect_num) |>   
-  select(site == ShawsCove, HeislerPark)
-  
+  select(site != "TreasureCove")
+#still shows treasurecove site
 
-ShawsHeislerDensity
+view(ShawsHeislerDensity)
 
-
-t.test(x = site, 
-       mu = mean(density), 
+t.test(x = site,
+       mu = density, 
        data = ShawsHeislerDensity)
 
 
@@ -357,8 +355,14 @@ Explain the results of this t-test. Are you surprised by this result, given the 
 
 ```{r}
 TC_density <- Limpet_Density |>
+  filter(site == 'TreasureCove') |> 
+  select(density, year, transect_num, transect_length_m, site)
 
-t.test(    )
+view(TC_density)
+
+t.test(x = year,
+       mu = density, 
+       data = TC_density)
 ```
 
 Since there was no difference in means, we'll ignore year at Treasure Cove from now on and just pool our data to make it easier for ourselves.
@@ -366,7 +370,12 @@ Since there was no difference in means, we'll ignore year at Treasure Cove from 
 #### 2.8 EXTRA CREDIT: Do an ANOVA comparing Shaws, Heisler, and Treasure Cove 2025 density data (exclude 2023 so that the sample size is similar between all three). Use a Tukey post-hoc test. Explain the results.
 
 ```{r}
+anova_extra_cred<- Limpet_Density |> 
+  filter(year != 2023)
 
+view(anova_extra_cred)
+
+TukeyHSD(aov(density ~ site, data = anova_extra_cred))
 
 ```
 
