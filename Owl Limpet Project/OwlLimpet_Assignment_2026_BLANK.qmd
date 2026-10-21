@@ -30,7 +30,7 @@ You have been given data from several locations and survey years:
 
 ------------------------------------------------------------------------
 
-The goal of this data analysis is to understand the relationship of owl limpet sizes across various sites and years. Data sets were recorded
+The goal of this data analysis is to understand the relationship of owl limpet sizes to territory size across various locations and years. The purpose of this data is to also assess whether locations of high visitation and high impact affect owl limpet sizes.
 
 ```{r}
 load(file = "Data/SizeData_2022_2025.Rdata")
@@ -65,7 +65,7 @@ ggplot(SizeData_2022_2025) +
 
 
 #To make a graph that displays shell length, year, and site, I used the geom_histogram to display the bars and facet wrap to group each of the graphs by year and site.  
-#From the graph, I observe that shell length is influenced by the site that it was recorded. This graph shows that sites with high impact produce owl limpets with smaller shell lengths. 
+#From the graph, I observe that shell length is influenced by the site. This graph shows that sites with high impact produce feweer owl limpets.
 ```
 
 We know our minimum size cut-off varied in different years of the surveys, and some teams just didn't follow directions. Filter out any observations smaller than 15 mm.
@@ -90,7 +90,8 @@ TransectLengths <- SizeData_2022_2025 |>
 
 TransectLengths
 
-#To create a table that shows transect length, site, and transect number, I use both select and distinct. I use select to choose columns from the SizeData_2022_2025. After, I use distinct to group together transect_length_m and site. 
+#To create a table that shows transect length, site, and transect number, I use both select and distinct. I use select to choose columns from the SizeData_2022_2025. After, I use distinct to group together transect_length_m and site.
+#The transect lengths varied by each site. Shaws Cove had transect lengths measured at 4.2,5.9, 6.3, 7.1, 7.8, and 8.0 meters. Heisler Park had transect lengths measured at 6.1, 6.3, 9.2, and 11.0 meters. 
 
 ```
 
@@ -110,7 +111,7 @@ TransectLengthsbox <- TransectLengths |>
 
 TransectLengthsbox
 
-#To create the boxplot, I created a new dataframe from the TransectLengths data. Then I set my aesthetic where my x-axis is site and my y-axis is transect_length_m. Aftwards, the aesthetic is piped into geom_boxplot to make a boxplot. 
+#To create the boxplot, I created a new dataframe from the TransectLengths data called TransectLengthsbox. Then, I set my aesthetic where my x-axis is site and my y-axis is transect_length_m. Aftwards, the aesthetic is piped into geom_boxplot to make a boxplot. 
 
 
 TransectLengthspoint <- TransectLengths |> 
@@ -119,7 +120,7 @@ TransectLengthspoint <- TransectLengths |>
   geom_point()
 
 TransectLengthspoint
-#To create a scatterplot, I created a new dataframe from the TransectLengths data. Then I piped it into the aesthetic where my x-axis is site and my y-axis is transect_length_m. Aftwards, the aesthetic is piped into geom_point to make a scatterplot. 
+#To create a scatterplot, I created a new dataframe from the TransectLengths data called TransectLengthspoint. Then I piped it into the aesthetic where my x-axis is site and my y-axis is transect_length_m. Aftwards, the aesthetic is piped into geom_point to make a scatterplot. 
 
 
 
@@ -130,7 +131,7 @@ TransectLengthsboxpoint <- TransectLengths |>
   geom_boxplot(fill = "blue")
   
 TransectLengthsboxpoint
-#To overlay both the boxplot and the scatterplot, I created a new dataframe from the TransectLengths data. Then I piped it into the aesthetic where my x-axis is site and my y-axis is transect_length_m. Aftwards, I defined the aesethic of the scatterplot in geom_point, to have red points. Then, I defined the geom_boxplot aesthetic with a blue fill to distinguish from the scatterplot points.
+#To overlay both the boxplot and the scatterplot, I created a new dataframe from the TransectLengths data called TransectLengthsboxpoint. Then I piped it into the aesthetic where my x-axis is site and my y-axis is transect_length_m. Aftwards, I defined the aesethic of the scatterplot in geom_point, to have red points. Then, I defined the geom_boxplot aesthetic with a blue fill to distinguish from the scatterplot points.
 
 
   
@@ -150,7 +151,8 @@ ggplot(SizeData_2022_2025) +
   aes(x = transect_length_m) +
   geom_bar()
 
-#I was interested to see the variability in the transect length. This graph demostrates that the data collection methods across the years and sites have not been consistent thus, data from survey collection is not reliable. 
+#To create a graph that shows the variability of the transect lengths between each site, I set my aesetheic to transect_length_m. Then, I added geom_bar to display the data as a bar graph. 
+#I was interested to see the variability in the transect length. Transect lengths across all years ranged 4 meters to 11 meters. This graph demostrates that the data collection methods across the years and sites have not been consistent thus, data from survey collection is not reliable. 
 ```
 
 This shows:
@@ -162,6 +164,7 @@ ggplot(SizeData_2022_2025) +
   aes(x = habitat) +
   geom_bar()
 
+#To create a graph that shows the variability of the habitat types between each site, I set my aesetheic to habitat. Then, I added geom_bar to display the data as a bar graph. 
 #I was interested to see the distribution of habitat types. I am suprised that an NA habitat exists. The graph shows that patch habitats were the most predominate type of habitat during te survey dates. 
 ```
 
@@ -177,7 +180,7 @@ No_CDM_Sizes <- SizeData_2022_2025 |>
 
 No_CDM_Sizes
 
-#To exclude Corona del Mar, I first created a seperate dataframe called No_CDM_Sizes. Aftwards, I then piped it into filter where I used ! to remove  Corona del Mar from the site column.  
+#To exclude Corona del Mar, I first created a seperate dataframe called No_CDM_Sizes. Aftwards, I then piped it into filter where I used ! to remove  Corona del Mar from the site column.
 ```
 
 #### 2.1. How many limpets did we measure at each site in each year for sizes?
@@ -206,13 +209,17 @@ No_CDM_Sizes |>
 
 # How many did we measure at each site? 
 #At the Heisler Park site, a total of 484 owl limpets were measured. At the Shaws Cove site, a total of 793 owl limpets were measured. At the  Treasure Cove site, a total of  469 owl limpets were measured. 
-#To find the total of  
+#To find the total of owl limpets per site, I grouped the sites together and used count. 
 
 No_CDM_Sizes |> 
   group_by(transect_num) |> 
   count()
 
-# How many did we measure in each transect?  T1 - 86, T2 - 245, T3 - 188, T4 - 128, T5 - 219, T6 - 297, T7 - 85, T8 - 169, T9 - 160, T10 - 137
+#How many did we measure in each transect?  
+# In transect 1,  86 owl limpets were measured. In transect 2, 245 owl limpets were measured. In transect, 188 owl limpets were measured. In transect 4, 128 owl limpets were measured. In transect 5, 219 owl limpets were measured. In transect 6, 297 owl limpets were measured. In transect 7, 85 owl limpets were measured. In transect 8, 169 owl limpets were measured. In transect 9, 160 owl limpets were measured. In transect 10, 137 owl limpets were measured. 
+#To find the total number of owl limpets that were measured in each transect, I grouped by the transect number and counted the values after the group. 
+
+
 No_CDM_Sizes
 ```
 
@@ -225,18 +232,27 @@ Limpet_Density <- No_CDM_Sizes |>
   group_by(site, year, transect_num, transect_length_m) |> 
   count(transect_length_m) |> 
   mutate(density 
-       = sum(n)/(transect_length_m * 2))
-  
-
+         = sum(n)/(transect_length_m * 2))
 
 Limpet_Density
+
+#The limpet density for each transect differs for each of the transects across each of the sites. The limpet density for Heisler Park ranges from 1.13 to 5.81. The limpet density for Shaws Cove ranges from 2.05 to 14.01. The limpet density for Treasure Cove ranges from 0.70 to 8.60. 
+#To find the owl limpet density for each transect, I created a new dataframe from the No_CDM_Sizes data. Then I grouped by site and transect number, because these columns are the most imporant for assessing limpet density. Then, I used count for the transect length. This is piped into the mutate. Inside mutate, I created a new column for density where the sum of the rows is divided by the transect length. Transect length is multipled by 2 to account for the square meter transect. 
 ```
 
 Do you see any patterns just from examining this table of values?
 
+--
+
+Yes, I see that limpet density has a wide range across all sites. Shaws Cove has the widest range of density. Treasure Cove has the second widest range of density. Lastly, Heisler Park has the smallest range of density.
+
 #### 2.2. Calculating mean and standard error of population density
 
 What was the mean limpets per square meter across all sites? And the standard deviation? And standard error?
+
+--
+
+The mean limpets per square meter across all sites is 3.33. The standard deviation of the limpets across all sites is 2.91. The standard error of the limpets across all sites is 0.45.
 
 ```{r}
 Limpet_Density |> ungroup() |> 
@@ -247,10 +263,15 @@ Limpet_Density |> ungroup() |>
     se_pop = sd(density)/sqrt(n))
 
 
-    
+#The mean limpets per square meter across all sites is 3.33. The standard deviation of the limpets across all sites is 2.91. The standard error of the limpets across all sites is 0.45. 
+#To find the mean, standard deviation, and standard error of the owl limpets, I used the Limpet_Density dataframe and ungrouped the columns that were previously grouped together. Then, I piped the ungrouped data into summarize. In summarize, I calculated for the mean, standard deviation, and standard error. For both mean and standard deviation, I set na.rm = TRUE so R studio will know to ignore any NA values when calculating. To calculate for standard error, I found the value of rows (n). Then, I divided the standard deviation of the density by the square root of n.
 ```
 
 Now create a summary table in which you calculate separate mean and standard deviation for each site and year (Shaws vs. Heisler vs. Treasure Cove)? What was the standard error? Round the mean and standard error to one decimal place. (look up the `round()` function!)
+
+--
+
+For Shaws Cove the mean was calculated as 6.0, the standard deviation was calculated as 3.9, and the standard error was calculated as 1.3. For Heisler Park the mean was calculated as 4.1, the standard deviation was calculated as 2.8, and the standard error was calculated as 0.9. In 2023, Treasure Cove had a mean as 2.3, a standard deviation as 1.3, and a standard error as 0.4. In 2025, Treasure Cove had a mean as 1.8, a standard deviation as 1.6, and a standard error as 0.5.
 
 ```{r}
 # use summarize() to calculate the mean and standard error (sd/sqrt(n)) for the two locations
@@ -262,13 +283,16 @@ LimpetPopSummary <- Limpet_Density |>
     n = n(),
     se_population = sd(density)/sqrt(n)) |> 
   mutate_at(vars(mean_population, sd_population, se_population),
-            .funs = round, 2)
+            .funs = round, 1)
   
 
 LimpetPopSummary
 
 # Display your summary nicely using kable(). 
 knitr::kable(LimpetPopSummary)
+
+#For Shaws Cove the mean was calculated as 6.0, the standard deviation was calculated as 3.9, and the standard error was calculated as 1.3. For Heisler Park the mean was calculated as 4.1, the standard deviation was calculated as 2.8, and the standard error was calculated as 0.9. In 2023, Treasure Cove had a mean as 2.3, a standard deviation as 1.3, and a standard error as 0.4. In 2025, Treasure Cove had a mean as 1.8, a standard deviation as 1.6, and a standard error as 0.5.   
+#To find the mean, standard deviation, and standard error of the population, I first created a new dataframe called LimpetPopSummary using Limpet Density. Then, I grouped by site and year from the data. Then, I used summary for the mean, find the mean, standard deviation, and standard error of the plot. After the mean, standard deviation, and standard error was calculated, I piped that into mutate where I rounded the calculations by 1 decimal place. 
 ```
 
 #### 2.4 Make three graphs to visualize the difference in density between the two sites.
@@ -284,7 +308,8 @@ Limpet_Density |>
   geom_boxplot() +
   labs(y = "Limpets per square meter")
   
- 
+#To create a boxplot that visualizes the difference in density between two sites, I used the Limpet Density data then piped that into a ggplot. From ggplot, I set the aesthetic to show site at the x-axis and density at the y-axis. I chose fill to highlight the year of the boxplots. After, I added the aesthetic into geom_boxplot and adjusted the label of my y-axis with labs. 
+
   
 ```
 
@@ -303,7 +328,7 @@ LimpetPopSummary |> ggplot() +
   labs(y = "Limpets per square meter")
   
 
-
+#To create a column plot with errors bars, I first piped the LimpetPopSummary data into ggplot. From ggplot, I set my aesthetic where my x-axis is site, y-axis is mean population, and the fill is set to the year. Then, I add geom_col where I specify the position of the columns should dodge each other. Following, I used geom_errorbar where I defined the yminimum and the ymaximum of the error bars, its position, and the width. Then, I added the labels of the y-axis. 
 
 
 
@@ -315,40 +340,53 @@ A `geom_point()` or `geom_jitter()`plot to visualize individual transect density
 LimpetPopSummary |> ggplot() +
   aes(x = site, 
       y = mean_population,
-      fill = year) +
+      color = year) +
   geom_point()+
   labs(y = "Limpets per square meter")
-  
-  
-  
-  
-  
-  
+
+#To create a scatterplot for the density data, I first piped the LimpetPopSummary data into ggplot. From ggplot, I defined my aesthetic where my x-axis is site, y-axis is mean population, and the color of each point is diffent by each year. Then I added the aesthetic into geom_point. Then, I defined the y-axis label with labs. 
 ```
 
 Which plot do you find the most informative and useful and why?
 
+--
+
+I find the boxplot the most informative and useful plot because it displays more information. I find it useful knowing the mean and where the outliers among my data. The other plots do not display the mean or outliers.
+
+--
+
 Based on these plots, does your data meet assumptions for a t-test?
+
+--
+
+Yes, the data meets the assumptions for a t-test.
+
+--
 
 T-Test assumptions (for a Student's T-test)
 
-- Are the data continuous (i.e., not categorical/discrete)?
+- Are the data continuous (i.e., not categorical/discrete)? Yes
 
-- Have the sample data been randomly sampled from a population?
+- Have the sample data been randomly sampled from a population? Yes
 
-- Is there homogeneity of variance (i.e., the variability of the data in each group is similar)?
+- Is there homogeneity of variance (i.e., the variability of the data in each group is similar)? No
 
-- Is the distribution of the model residuals approximately normal?
+- Is the distribution of the model residuals approximately normal? Yes
 
 #### 2.5 What is the sample size (of transects) for each site/year for our study of limpet population density?
 
 Is it roughly the same so that we can compare? Is it enough to run a statistical test?
 
+--
+
+The sample size of transect is each site/year is 41. Yes, the sample size of the is roughly the same and is enough to run a statistical test.
+
 ```{r}
 Limpet_Density |> 
   group_by (transect_num, transect_length_m, site, year)
 
-#41
+#The sample size of the transect for each site year is 41. 
+#To find the sample size, I piped Limpet Density data into group by where I grouped by transect number, transect length, site, and year. 
 
 ```
 
@@ -356,25 +394,35 @@ Limpet_Density |>
 
 Filter the data to only include those sites before putting it into the `t.test()` function. These are a good comparison because they were measured in the same year with the same survey methods.
 
+--
+
+There isn't a significant difference between the number of owl limpets per square meter between Heisler Park and Shaws Cove. From the t-test the mean of Heisler Park is 4.07 and the mean of Shaws Cove is 5.95. The p-value for the t-test is 0.26. The p-value is greater than 0.05, meaning this isn't a significant difference between the two sites.
+
 ```{r t-test}
 # run a t-test on your count data from each site (Limpet_Density)
 ShawsHeislerDensity <- Limpet_Density |> 
   filter(!site == "Treasure Cove")
 
-
 view(ShawsHeislerDensity)
 
-
-
 t.test(density~site, data = ShawsHeislerDensity)
-#there is diff but not really 26% pvalue 
+#There isn't a significant difference between the number of owl limpets per square meter between Heisler Park and Shaws Cove. From the t-test the mean of Heisler Park is 4.07 and the mean of Shaws Cove is 5.95. The p-value for the t-test is 0.26. The p-value is greater than 0.05, meaning this isn't a significant difference between the two sites.   
+#To find the mean of limpets within Shaws Cove and Heisler Park, I first removed the Treasure Cove data and created a seperate dataframe called ShawsHeislerDensity. Then, I viewed the new dataframe to make sure the Treasure Cove values were removed from the site column. After I ran a t-test using my independent (site) and dependent (density) variables.  
 
 
 ```
 
 Explain the results of this t-test. Are you surprised by this result, given the figure you made above? Why do you think the results are what they are?
 
+--
+
+The results of the t-test show that there isn't a significant difference between the limpets per square meter across Shaws Cove and Heisler Park. The results show there isn't a significant difference because the p-values is 0.26, and that is above the 0.05 significance threshold.
+
 #### 2.7 Did Treasure Cove population density differ between the two sample years? Do a t-test and make a graph to complement presenting the result.
+
+--
+
+Across the two years, the Treasure Cove population density does difference. However, the population density across the two year does not differ significantly. The p-value of the t-test is 0.40, which is too high above the 0.05 threshold for significance.
 
 ```{r}
 TC_density <- Limpet_Density |>
@@ -388,7 +436,8 @@ t.test(density~year, data = TC_density)
 ggplot(TC_density, aes(x = year, y = density)) + 
   geom_boxplot() 
 
-#yes density differ but not signicantly 
+#Yes, density between the two years within Treasure Cove differ. The t-test results show that the 2023 mean is 2.29 and the 2025 mean 1.78. The p-value is 0.40, which is above the significance threshold of 0.05. 
+#To find the difference between the two years of Treasure Cove, I first created a new dataframe called TC_density using the Limpet_Density data. Then, I piped into a filter where I specified Treasure Cove as the only site. Then, I selected density, year, transect_num, transect_length_m, and site to include in the new TC_density dataframe. Then, I viewed my data to confirm Treasure Cove is the only site. Then, I ran a t-test for the data, with my independent variable (year) and my dependent variable (density). After I created a boxplot for the TC_density. I defined the aesthetic of the plot where the x-axis is year and the y-axis is density. Then I added all to a boxplot to visualize.  
 ```
 
 Since there was no difference in means, we'll ignore year at Treasure Cove from now on and just pool our data to make it easier for ourselves.
@@ -402,7 +451,7 @@ anova_extra_cred<- Limpet_Density |>
 view(anova_extra_cred)
 
 TukeyHSD(aov(density ~ site, data = anova_extra_cred))
-#0.006 is significantt
+#From the TUkeyHSD test, I compared the density of each site against each other, excluding the data from 2023. The results did three comparisions of the sites, Shaws Cove to Heisler park, Treasure Cove to Heisler Park, and Treasure Cove to Shaws Cove. One comparison, Treasure Cove to Shaws Cove, yielded signficiant results. The p-value of Treasure Cove to Shaws Cove is 0.006 and because this is below the 0.05 p-value significance threshold. This result means that this comparison is the least likely to happen by chance. 
 ```
 
 ## Part 3: Size
@@ -410,6 +459,10 @@ TukeyHSD(aov(density ~ site, data = anova_extra_cred))
 #### 3.1 Summary Statistics
 
 ##### 3.1.1 How variable were limpet shell lengths at each site and sample year? What is the sample size at each site?
+
+--
+
+The limpet shell lengths varied by site and year. For Treasure Cove, the 2023 mean shell length is 43.34 and in 2025 the mean shell length is 41.71. For Corona del Mar, the mean shell length is 33.73. For Heisler Park the mean shell length is 32.54. For Shaws Cove, the mean shell length is 26.41. The limpet shell lengths varied greatly across a wide range between 26.41 to 43.34. The sample size at Corona del Mar was 187. The sample size for Heisler Park is 484. The sample size for Shaws Cove is 793. In 2023 for Treasure Cove, the sample size is 252 and in 2025 was 217.
 
 ```{r summary statistics }
 # generate a nice table (like you did for counts, using kable() and round digits) with the mean shell length, standard deviation, and sample size of each site. Ignore transect. 
@@ -681,9 +734,8 @@ plot(log_model, which = 2)
 ```{r linear regression test summary}
 
 round(coef(log_model), 5)
-y = mx + b
-
-y = 7.12141 x+ 0.00006
+#y = mx + b
+#y = 7.12141 x+ 0.00006
 ```
 
 **The formula for the best fit line can be extracted from the model summary. The two values in the Estimate column are the coefficients - (Intercept) gives the y-intercept, and the variable gives the slope.**
