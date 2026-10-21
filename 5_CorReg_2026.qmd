@@ -15,7 +15,7 @@ Today we will play with a few datasets that fit these criteria.
 ### Steps for Correlation and Regression
 
 - Step 1: Look at your data. Is it tidy?
-- Step 2: Visualize the data
+- Step 2: Visualize the data - graphs
 - Step 3: Check your assumptions
 - Step 4: Apply transformations, if necessary
 - Step 5: Determine which test to use
@@ -43,6 +43,8 @@ The dataset `mayfly` shows the abundance of a mayfly species and the speed of th
 
 ```{r}
 mayfly
+
+#data is tidy
 ```
 
 We think there might be a relationship here!
@@ -53,7 +55,7 @@ Let's make a scatter plot to explore this data and see if we think there might b
 
 ```{r}
 ggplot(mayfly) + 
-  aes(Speed, Abund) +
+  aes(x = Speed,y = Abund) +
   geom_point()
 ```
 
@@ -67,13 +69,15 @@ The assumptions of correlation are:
 
     2.  Since this looks like a linear relationship, we'll proceed.
 
-2.  **Multivariate normality** - check normality of all dependent variables (both IV and DV if using Spearman correlation)
+2.  **Multivariate normality** - check normality of all dependent variables (both IV (independent) and DV (dependent) if using Spearman correlation)
 
 ##### Are one or both of your variables **normal**? (this is a very small sample size, so we will assume its good enough, but normally you could check with a histogram)
 
 ```{r}
 hist(mayfly$Abund)
 hist(mayfly$Speed)
+
+#good to use this for assumption checks. just looking at one column in the dataset. neither look normally distributed.  
 ```
 
 3.  **Homoscedasticity** - is there roughly equal variance across the range of data?
@@ -81,9 +85,13 @@ hist(mayfly$Speed)
 **Homoscedasticity** - Run the next chunk, then click the first plot, labeled "Residuals vs Fitted". That first plot plots the residuals (the differences between the individual points and the predicted relationship) against the fitted values (the values they would be in a perfect line). The deviation from the dashed line at zero is the residual (the difference between the observed datapoint and the fitted line).
 
 ```{r}
-mayfly.lm <- lm(Abund ~ Speed, data = mayfly)
+mayfly.lm <- lm(Abund ~ Speed, data = mayfly) 
+#abundance is response. speed is predictor. 
 plot(mayfly.lm)
+#resdiduals vs fitted is the only one we care about. 
 plot(mayfly.lm, which = 1)
+#this shows only the first of the 4 graphs that were created
+
 
 ```
 
@@ -99,14 +107,16 @@ sigma2 = n^1.3
 eps = rnorm(n,mean=0,sd=sqrt(sigma2))
 y=a+b*n + eps
 mod <- lm(y ~ n)
+#generates a fake dataset. 
 
 plot(y ~ n)
+#generates a plot where values on the right are wider on the right. 
 ```
 
 Now lets look again at that plot of residuals vs. fitted values:
 
 ```{r}
-plot(mod, which = 1)  # Plot the model information
+plot(mod, which = 1)  # Plot the model information. mayfly data is homodedastic. 
 ```
 
 We decide our mayfly data is homoscedastic (same variance) so we can move on.
@@ -149,6 +159,7 @@ First let's demonstrate the non-parametric, ranked data, Spearman's rank coeffic
 
 ```{r}
 cor.test(Abund, Speed, data = mayfly, method = "spearman")
+#rho is 0.809. ths is significant relationship bc pvalue is < 0.05
 
 #save the output to an object
 MayCorSpear <- cor.test(Abund, Speed, data = mayfly, method = "spearman")
@@ -166,6 +177,8 @@ MayCorSpear$
 MayCorSpear$estimate
 rho_spear <- round(MayCorSpear$estimate, 3)
 rho_spear
+
+#estimating and rounding the value of rho
 ```
 
 The p-value shows us whether that relationship is significant (depending on the sample size)
@@ -173,6 +186,8 @@ The p-value shows us whether that relationship is significant (depending on the 
 ```{r}
 MayCorSpear$p.value 
 round(MayCorSpear$p.value, 3)
+
+#mayfly abund is correlated to stream speed. how to round the p value 
 ```
 
 And you can stop here! You write this formally as something like, "Mayfly abundance is positively correlated with stream flow speed (rho = `r rho_spear`, p = `r round(MayCorSpear$p.value, 2)` )
@@ -184,6 +199,8 @@ MayCorPear <- cor.test(Abund, Speed, data = mayfly, method = "pearson")
 MayCorPear
 MayCorPear$estimate
 MayCorPear$p.value
+
+#
 ```
 
 What the Pearson's product moment is calculating is the strength of the linear relationship, which is interesting, but we would like to go further when we're doing a simple linear regression. For that, we would like to calculate the SLOPE and INTERCEPT of the best fit line through those points.
@@ -204,6 +221,8 @@ We've seen this before, when we were testing assumptions for the T-test and earl
 mayfly.lm <- lm(Abund ~ Speed, data = mayfly)
 mayfly.lm
 summary(mayfly.lm)
+
+#pvalue at the bottom is for the whole model. the pvalue above is just for that variable 
 ```
 
 What outputs do we get from this model?
@@ -213,6 +232,8 @@ What outputs do we get from this model?
 ```{r}
 slope <- coef(mayfly.lm)[2]
 slope
+
+#generates the slope from the table above. simple linear regression. 2 give just the slope 
 ```
 
 2.  The intercept of the line is found just above that, Estimate for `(Intercept)`
@@ -220,6 +241,8 @@ slope
 ```{r}
 int <- coef(mayfly.lm)[1]
 int
+
+#generates the intercept from the table above. simple linear regression. 1 gives just the intercept. $shows one column. [brackets show 1 value] 
 ```
 
 What is the formula for the best fit line?
@@ -241,6 +264,8 @@ summary(mayfly.lm)$coefficients[2,4]
 ```{r}
 Rsq <- summary(mayfly.lm)$r.squared
 Rsq
+
+#rsq higher then its a tighter relationship. lower then its a fuzzier/not good relationship. 
 ```
 
 Speed explains 71% of the variation in mayfly abundance!
@@ -254,6 +279,7 @@ Mayflyplot <- ggplot(mayfly) +
   
 Mayflyplot +
   geom_smooth(method = "lm", se = FALSE)
+#putting false removes the confidence interval on the graph. not super useful.  
 ```
 
 If your line wasn't significant, make sure that is clear by making it a dotted or dashed line.
@@ -261,6 +287,8 @@ If your line wasn't significant, make sure that is clear by making it a dotted o
 ```{r}
 Mayflyplot +
   geom_smooth(method = "lm", se = FALSE, linetype = "dashed")
+
+#
 ```
 
 IF YOUR LINEAR RELATIONSHIP IS SIGNIFICANT, it's also common to add the equation and R-squared value onto the plot, to be cool.
@@ -274,10 +302,14 @@ Mayflyplot +
   geom_smooth(method = "lm", se = FALSE) +
   geom_text(x = 10, y= 40, 
             label = paste("R-squared =", Rsq,", y =", slope, "x +", int))
+
+#geom_text adds text to the figure 
 ```
 
 ```{r}
 summary(mayfly.lm)
+
+
 ```
 
 To report these results, we need to report a few things - the equation of the line may be interesting, but to report the result of the significance tests, we report the *R-squared* as well as the *F-statistic* and *degrees of freedom*, like we would for an ANOVA.
@@ -311,9 +343,12 @@ pg
 
 ```{r}
 ggplot(pg)+
-  aes(nutrient, growth)+
+  aes(x = nutrient, y = growth)+
   geom_point() + 
   geom_smooth(method = "lm")
+
+#not linear??????
+
 ```
 
 Not so linear!
@@ -338,6 +373,8 @@ To fit a linear model, you just plug in the log-transformed variable into the sa
 pg.lm_bad <- lm(growth ~
                   nutrient, data = pg)
 
+#dependent ~ independent 
+
 plot(pg.lm_bad)
 
 pg.lm <- lm(growth ~ log(nutrient), data = pg)
@@ -350,7 +387,7 @@ It still fits a `y = mx+b` framework, but now the x is log-transformed
 
 > y = a \* ln(x) + c
 
-a = analogous to slope c = intercept
+a = analogous to slope, c = intercept
 
 | growth = 5.10 Ln (nutrient) + 0.69
 
