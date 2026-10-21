@@ -28,7 +28,7 @@ You have been given data from several locations and survey years:
 
 - 2025: Treasure Cove (TC) - size data in 5-m transects, territories
 
----
+------------------------------------------------------------------------
 
 The goal of this data analysis is to understand the relationship of owl limpet sizes across various sites and years. Data sets were recorded
 
