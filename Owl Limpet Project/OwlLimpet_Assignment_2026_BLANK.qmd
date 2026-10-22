@@ -475,9 +475,8 @@ SizeData_2022_2025 |>
             sd_shell = sd(shell_length_mm),
             sample_shell = n()) |> 
   kable(digits = 2)
-  
 
-  
+#To generate a table, I grouped the columns for site and year. Then, I piped the grouped data into summarise. In summarise, I calculated the mean, standard deviation, and sample size. After the caclculations, I piped into kable to create a table, where I rounded the values to 2 decimals. 
 ```
 
 ##### 3.1.2 Graph the shell lengths at each site using a boxplot. What do you observe?
@@ -486,12 +485,16 @@ SizeData_2022_2025 |>
 ggplot(SizeData_2022_2025, aes(x = site, y = shell_length_mm)) +
   geom_boxplot()
   
-
-  
-
+#From the boxplot, I observe that shell length varies by site. I observe that Treasure Cove generally has owl limpets that are larger. Whereas, Shaws Cove generally has owl limpets that are smaller.   
 ```
 
 #### 3.2. Is there a [statistically significant]{.underline} difference in [mean]{.underline} size between limpets measured at Treasure Cove (a relatively low-impact site) compared to CDM (a high impact site)?
+
+--
+
+Yes, there is a statistically significant difference in the mean sizes between Treasure Cove and Corona del Mar. Using the F-test below, between Treasure Cove and Corona del Mar, the p-value that was calculated is below 0.05, the threshold for significance.
+
+--
 
 We have a much larger sample size for shell lengths than we did for density, so we can apply our tests of assumptions more rigorously and demonstrate our various tests.
 
@@ -521,13 +524,16 @@ plot(model, which = 1)
 
 # F-test for homogeneity of variance - if p-value < 0.05 then variances are different. 
 var.test(shell_length_mm~site, data = CDM_TC_Sizes)
-#pvalue below variance is sign diff. cdm/tc to get ration. cdm limpet sizes are less spread out than tc. check summary table for sd. 
 
 # NOTE: if your sample fails this test, have no fear! Welch's t-test (the default that R uses) is okay to use with unequal variances. 
 
 ```
 
 - Is the distribution of the model residuals approximately normal?
+
+--
+
+Using the shapiro-wilk test, and examining the QQ plot, I can tell the data is normally distributed. From the shapiro-wilk test, the W represents how close data fits a normal distribution. This data has 0.9 for W, and a p-value below 0.05, therefore I can trust that this data is normally distributed.
 
 ```{r}
 ## Test for normality
@@ -538,7 +544,6 @@ plot(model, which = 2)
 # conduct a Shapiro-Wilk test on the residuals
 shapiro.test(model$residuals)
 
-#small pvalue means to trust w, below 0.05.  and w closer to 1, this is normal 
 ```
 
 Why will we not pay attention to this Shapiro-Wilk test result? Because the sample size is very large and Shapiro-Wilk is overly sensitive (gives false positives) at large sample sizes.
@@ -549,7 +554,7 @@ Why will we not pay attention to this Shapiro-Wilk test result? Because the samp
 # calculate the t-test results
 t.test(shell_length_mm~site, data = CDM_TC_Sizes)
 
-#wilcox test . resdiual are normal. large sample. noramal dist
+#I used a t-test to determine whether the association between site and shell length is statistically significant. The calculated p-value is 2.2e-16, which is below the 0.05 significance threshold. Therefore, the association between site and shell length can be trusted.
 ```
 
 #### [3.3 Graph your results using a column plot with error bars for standard error]{.underline}
@@ -569,18 +574,34 @@ CDM_TC_summary |>
   ggplot(aes (x = site, y = mean)) +
   geom_col() +
   geom_errorbar(aes (ymin = mean - se,
-                     ymax = mean + se))
+                     ymax = mean + se))+
+  labs(y = "average shell length")
+
+#To graph the results, I first created a summary dataframe where I calculated mean, standard deviation, and standard error. Then, to create the plot, I defined the aesthetic in ggplot for x-axis as site and y-axis as mean. Then, I added geom_col to specify this is a column plot. Then, I calculated the values of the error bars, my ymin is the subraction of my standard error from the mean, the ymax is the addition of the standard error to the mean, within geom_error bar. Finally, I changed the label of the y-axis with labs to "average shell length".
 ```
 
 #### [3.4 - Interpret and explain the results of your test]{.underline}
 
 Are we pretty confident that these samples were drawn from different populations? Why is the standard error so small?
 
+--
+
+The standard error is very small because the data is a good representation of the true population.
+
 #### 3.5 - EXTRA CREDIT: repeat this analysis to see if the same result holds for the comparison at Heisler Park (high impact site) vs. Shaws Cove (low impact site).
 
 If you would like to test whether size differs by predicted human impact, at CDM and TC "near" means high impact and "far" means low impact. Heisler was our high impact site and Shaws was our low impact site.
 
 ```{r}
+HP_CDM_Summary<-SizeData_2022_2025 |> 
+  group_by(site, year, transect_length_m, shell_length_mm) |> 
+  summarise(mean_sum = mean(densit),
+            sd_sum = 
+            n = n())
+
+#summary statistics
+#graphing
+#ttest
 
 ```
 
