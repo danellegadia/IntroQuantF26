@@ -307,7 +307,9 @@ sward2
 
 ### Step 2: Write a formula for the test
 
-Which variable is the predictor (IV)? Which is the response (DV)?
+Which variable is the predictor (IV)? (categorical variable)
+
+Which is the response (DV)?
 
 Compose a formula that represents how you think your variables are related (i.e., your hypothesis). You can think of this as a sentence that says, RESPONSE is a function of PREDICTOR, where the tilde (\~) stands in for the words "is a function of" or "depends on".
 
@@ -333,6 +335,8 @@ The first step in an analysis is ALWAYS to visualize your data. Does it look abo
 ggplot(sward2) + 
   aes(x = Site, y = Height) + 
   geom_boxplot()
+
+#has a homogenity of variance between each boxplot 
 ```
 
 ### Step 4 : Check Assumptions
@@ -345,7 +349,7 @@ Are there extreme outliers in your plot? A couple relatively close to the `1.5*I
 
 #### Normality
 
-Do your box plots look roughly symmetrical from top to bottom?
+Do your box plots look roughly symmetrical from top to bottom? -
 
 ```{r}
 #examples with fake data
@@ -367,6 +371,9 @@ HOVbad <- tibble(vec1,vec2,vec3) |> pivot_longer(names_to = "dist", values_to = 
 ggplot(HOVbad, aes(x = dist, y =vals)) + geom_boxplot()
 
 HOVbadmodel <- lm(vals~dist, data = HOVbad)
+
+#1st graph - the normal looks mostly normal because the whiskers are mostly the same. even though the mean isnt in the middle, its close. this has pretty close variance. 
+#2nd graph - these boxplots fail the homogenity of variance. 
 ```
 
 Does a Q-Q plot of the model residuals form roughly a straight line?
@@ -378,6 +385,9 @@ plot(model, which = 2)
 
 plot(abnormalmodel, which = 2)
 
+#qq plot looks to see if data is normally distributed. 
+#1st graph is normal. very close to the line. 
+#2nd graph is not normal because it is off the line. 
 ```
 
 The null hypothesis of a Shapiro-Wilk test is that the distribution of the data is not different from a normal distribution. Therefore, p\<0.05 means your model residuals are different from normal. Caveat: the Shapiro-Wilk test is oversensitive with greater than 50 observations. Our "badmodel" is significantly not normal, but also has 60 observations, so the Shapiro test is starting to be not appropriate.
@@ -387,6 +397,7 @@ shapiro.test(model$residuals)
 
 shapiro.test(abnormalmodel$residuals)
 
+#shapiro tests show if the distribution is different from the model. if p<.05 then data is not normal. if p > .05 then it is normal? 
 ```
 
 Since our data is normal, we can move on to conduct the ANOVA!
@@ -396,11 +407,11 @@ Since our data is normal, we can move on to conduct the ANOVA!
 One way to check HOV is to plot the residuals against the fitted values and eyeball whether the variance looks screwy. If the variance isn't wildly different between the three samples, then we're good.
 
 ```{r}
-plot(model, 1)
+plot(model, 1) #spread of vertical lines are mostly the same 
 
-plot(model)
+plot(model) #
 
-plot(abnormalmodel, 1)
+plot(abnormalmodel, 1) #test for homegenity of variance 
 
 plot(abnormalmodel)
 ```
@@ -408,6 +419,8 @@ plot(abnormalmodel)
 The null hypothesis of the Bartlett Test is that the variance is equal among all treatments.
 
 ```{r}
+#sward data meets homegenity of variance
+
 ?bartlett.test
 
 # Bartlett Test of Homogeneity of Variances
@@ -415,6 +428,8 @@ bartlett.test(Height~Site, data=sward2)
 
 # HOV is separate from testing for normality! 
 bartlett.test(vals~dist, data = HOVbad)
+
+#
 ```
 
 Sward looks good, so let's do the ANOVA!
@@ -428,6 +443,8 @@ You actually already conducted the computations for the ANOVA when you ran the l
 # model <- lm(Height ~ Site, data = sward2)
 
 anova(model)
+
+#residuals are the ??
 ```
 
 The table above is what you are expected to report along with your analysis when you do an ANOVA for a paper. In addition, if you refer to your results in text, you'll share your F-value with the degrees of freedom as a subscript and the p-value (see Gardener Ch. 10, p. 259 for details and examples).
@@ -455,7 +472,11 @@ If you do not find a relationship (i.e., p \> 0.05), then you are done. However,
 ```{r}
 # TukeyHSD likes a particular format for our input - instead of the lm() anova strategy it prefers an object made by aov(). It does the same calculations, just using a different function name. 
 
+summary(aov( Height ~ Site, data = sward2 ))
+
 TukeyHSD( aov( Height ~ Site, data = sward2 ) )
+
+#upper and middle relationship is the most significant. because of smaller 0.05 p value 
 ```
 
 Which ones are different?
@@ -505,6 +526,8 @@ ggplot(sward2) +
     fun.data = mean_cl_normal,
     geom = "errorbar", 
     width = 0.1)
+
+
 ```
 
 That's a little stocky looking though, so let's try another way to look at it. All we have to do is substitute geom_point(). This one collapses the y-axis so it doesn't go all the way to zero, which can be an advantage if your variables don't make sense to go all the way to zero.
@@ -519,6 +542,7 @@ ggplot(sward2) +
     fun.data = mean_se,
     geom = "errorbar", 
     width = 0.1) 
+#does not include 0 in the y axis 
 
 ```
 
@@ -528,6 +552,8 @@ This is a bit of a logic puzzle to annotate. Look at those Tukey HSD results aga
 
 ```{r}
 TukeyHSD(aov(Height~Site, data = sward2))
+
+
 ```
 
 If one differed from all the others, then this would be simple and you can just put an asterisk above the one that is different.
