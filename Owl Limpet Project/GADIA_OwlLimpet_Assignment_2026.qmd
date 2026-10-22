@@ -586,22 +586,14 @@ Are we pretty confident that these samples were drawn from different populations
 
 --
 
-The standard error is very small because the data is a good representation of the true population.
+Yes, the samples were collected from different populations across different sitres. The standard error is very small because the data is a good representation of the true population.
 
 #### 3.5 - EXTRA CREDIT: repeat this analysis to see if the same result holds for the comparison at Heisler Park (high impact site) vs. Shaws Cove (low impact site).
 
 If you would like to test whether size differs by predicted human impact, at CDM and TC "near" means high impact and "far" means low impact. Heisler was our high impact site and Shaws was our low impact site.
 
 ```{r}
-HP_CDM_Summary<-SizeData_2022_2025 |> 
-  group_by(site, year, transect_length_m, shell_length_mm) |> 
-  summarise(mean_sum = mean(densit),
-            sd_sum = 
-            n = n())
 
-#summary statistics
-#graphing
-#ttest
 
 ```
 
@@ -625,11 +617,16 @@ load(file = "Data/FenbergTerr.Rdata")
 
 #### 4.2 How many limpet territories did we measure?
 
+--
+
+In 2024 at Heisler Park, 54 territories were measured. In 2024 at Shaws Cove 83 territories were measured. For Treasure Cove in 2023 51 territories were measured. For Treasure Cove in 2025, 190 territories were measured.
+
 ```{r}
 ## How many territories were measured at each site in each year? 
 All_Territories |>
   count(site, year)
 
+#In 2024 at Heisler Park, 54 territories were measured. In 2024 at Shaws Cove 83 territories were measured. For Treasure Cove in  2023 51 territories were measured. For Treasure Cove in 2025, 190 territories were measured. 
 
 ```
 
@@ -661,6 +658,10 @@ view(All_Territories_area_mass)
 
 Explore the relationship between mass_g, and area_mm2 using scatter plots.
 
+--
+
+There is a positive correlation between limpet size and territory size when plotted against each other.
+
 ```{r}
 # plot size_mm vs area_mm2 scatterplot with best fit regression line, no SE zone, not separated by site
 All_Territories_area_mass |> 
@@ -669,9 +670,7 @@ All_Territories_area_mass |>
   geom_point() +
   geom_smooth(se = FALSE)
 
-
-
-#se zone the confidence interval gray area????
+#To create this plot, I used ggplot and defined the aesethics. In aesthetic, I defined the x-axis as size and y-axis as area. Then I defined the plot as a scatterplot with geom_point. Lastly, I added geom_smooth to add a best fit line, where I set the standard error to false, which removes the gray confidence intervals. 
 ```
 
 ```{r}
@@ -681,7 +680,8 @@ All_Territories_area_mass |>
   aes(x = size_mm, y = territory_area, fill = site) + 
   geom_point() +
   geom_smooth()
- 
+
+#To create this plot, I used ggplot and defined the aesethics. In aesthetic, I defined the x-axis as size, y-axis as area, and fill as site. Then I defined the plot as a scatterplot with geom_point. Lastly, I added geom_smooth to add a best fit line.
 ```
 
 ```{r}
@@ -693,16 +693,16 @@ All_Territories_area_mass |>
   geom_smooth(se = FALSE)+
   facet_wrap(~habitat)
 
-#why na habitat??
+#To create this plot, I used ggplot and defined the aesethics. In aesthetic, I defined the x-axis as limpet body mass and y-axis as area. Then I defined the plot as a scatterplot with geom_point. Then, I added geom_smooth to add a best fit line, where I set the standard error to false, which removes the gray confidence intervals. Lastly, I facet wrapped the graphs by the habitat to understand the relationshop of body mass, territory area, and habitat type. 
 ```
 
 #### 4.5 What observations do you make about these plots? What do you find interesting about them? Explain one observation and make one more plot of your choosing to explore something you found interesting.
 
+--
+
+I observe that limpet size is directly related to the site and habitat type. I find the relationship between limpet size and habitat type very interesting because it reflects that owl limpets thrive and are larger in open habitats. In open patches, owl limpets have a larger territory area.
+
 ```{r}
-
-
-#open patches have a higher territory area 
-
 
 All_Territories_area_mass |>
   ggplot() + 
@@ -711,24 +711,32 @@ All_Territories_area_mass |>
   geom_smooth(se = FALSE)+
   facet_wrap(~year)
 
+##To create this plot, I used ggplot and defined the aesethics. In aesthetic, I defined the x-axis as limpet body mass and y-axis as area. Then I defined the plot as a scatterplot with geom_point. Then, I added geom_smooth to add a best fit line, where I set the standard error to false, which removes the gray confidence intervals. Lastly, I facet wrapped the graphs by the year to understand the relationshop of body mass, territory area, across the years.  
+
 ```
 
 #### 4.6. What important assumptions of tests of linear regression do these scatter plots fail? How can you tell?
 
-```{r}
+--
 
+These scatter plots fail the test of homoscedasticity. I can tell that these scatter plots fail homoscedasticity because the residuals vs fitted plot represents cluster of points. Clustered points represent heteroscedasticity.
+
+```{r}
 # write a linear model for the relationship, then use the plot() function on the model object to show the residuals vs. fitted values and QQ plots to assess your regression. 
 
 linear_model <- lm(limpet_body_mass~territory_area, data =  All_Territories_area_mass)
 
 plot(linear_model)
 
-#the scatter plot fails because its clustered 
 ```
 
 One way to transform data that has this shape is to apply a log-transformation. Logarithmic relationships are common in biology for mass, volume, or other spatial relationships.
 
 #### 4.7. Plot the relationship between log-transformed mass and log-transformed area. Does this relationship meet assumptions?
+
+--
+
+After log transformation, the relationship does meet my assumptions of normality and homoscedasticity.
 
 ```{r scatterplot with regression line}
 # plot a scatterplot log area on y axis by log mass_g on x axis, best fit regression line but no SE interval
@@ -739,7 +747,6 @@ All_Territories_area_mass |> ggplot() +
   geom_smooth(method = lm, se = FALSE)
   
 
-#yes
 ```
 
 ```{r}
@@ -751,6 +758,10 @@ plot(log_model, which = 2)
 ```
 
 #### 4.8. What is the formula for the best fit line for the relationship between territory size and body mass in owl limpets?
+
+--
+
+The formula for the best fit line between territory size and body mass in owl limpets is: y = 7.12141 x+ 0.00006.
 
 ```{r linear regression test summary}
 
@@ -782,12 +793,25 @@ FenbergTerr |> ggplot() +
 # Find the slope and intercept of the best fit line
 Fenberg_model <- lm(mass_g~area_mm2, data = FenbergTerr)
 coef(Fenberg_model)
+#The slope is 0.0004 and the intercept is 0.8327. 
 ```
 
 Explain your findings!
+
+--
+
+The best fit line formula between the original study and our study showcases different intercepts and slopes. The best fit line formula for our study is: y = 7.12141 x+ 0.00006. The best fit line formula for the original study is y = 0.8327x + 0.0004. The differing slope shows that our study has a slower rate of change compared to the original study.
 
 ### Part 5: EXTRA CREDIT:
 
 #### 5.1 Calculate the slope of best fit regression separately for each site.
 
+```{r}
+
+```
+
 #### 5.2 Explore some aspect of the data you find interesting and ask a unique question.
+
+```{r}
+
+```
