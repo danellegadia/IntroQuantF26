@@ -55,6 +55,8 @@ Lets follow all our steps:
 pw
 
 names(pw)
+
+#this data is tidy 
 ```
 
 This dataset is already in tidy format. Lucky us!
@@ -85,6 +87,8 @@ The second formula can also be written as: `height ~ plant + water + plant:water
 ggplot(pw) +
   aes(x = water, y = height, fill = plant) + 
   geom_boxplot()
+
+
 ```
 
 ### Step 4: Check assumptions
@@ -104,6 +108,8 @@ plot(model, which = 2)
 
 # Create a QQ plot of residuals
 ggpubr::ggqqplot(residuals(model))
+
+#qq plot looks good. residuals look normal 
 ```
 
 #### Homogeneity of variance:
@@ -118,6 +124,9 @@ For multi-way ANOVA, Levene's test works pretty well.
 plot(model, which = 1)
 
 pw %>% rstatix::levene_test(height ~ plant*water)
+
+#looking for symmetrical variance across the clusters across the lines. even variance above and below the line and across the line. 
+#the levene test shows us if the variance is big. and if it is what we expect. there is a homegenity of variance 
 ```
 
 Looks pretty okay!
@@ -128,9 +137,15 @@ Looks pretty okay!
 #There are two ways to run ANOVA. This one is useful for some functions, aov() we'll do for the Tukey Test. Both come out with the same answer. 
 model_pw_lm <- lm(height ~ plant * water, pw)
 anova(model_pw_lm)
+#lm are linear model functions
+
+
 
 model_pw_aov <- aov(height ~ plant * water, pw)
 summary(model_pw_aov)
+#tukey test likes the results of the aov function
+#lm and aov give the same result 
+#water is signifcant. there is signficant interaction between plant*water. plant is not significant. 
 ```
 
 At first pass, it looks like:
@@ -149,7 +164,11 @@ An easy first pass to examine if you've set up your model correctly is to check 
 
 - k - 1 plant has two species, so `2 - 1 = 1`
 
+- #considers the df
+
 - water has three levels, so `3 - 1 = 2`
+
+- #considers the df
 
 #### Interaction degrees of freedom:
 
@@ -165,7 +184,7 @@ Here, rows are the species treatment (2 - 1 = 1) and columns are the water treat
 
 pw |> count() # 18 total rows
 
-nrow(pw) - (2 * 3) # 
+nrow(pw) - (2 * 3) #expecting 12 df  
 ```
 
 Let's see if what we computed matches with the model output:
@@ -173,6 +192,7 @@ Let's see if what we computed matches with the model output:
 ```{r}
 model_pw_aov
 
+#12 df in the residuals 
 ```
 
 If your degrees of freedom don't add up, you can try the following troubleshooting steps:
@@ -195,6 +215,8 @@ It will give us the pairwise differences within each treatment (ignoring the oth
 #model_pw_aov 
 
 TukeyHSD(model_pw_aov)
+
+#this gives the pairwise difference. look at p adj and record the significant interactions 
 ```
 
 So we already knew there wasn't a difference between plant species, and as there are only two, it only shows us one pairwise p-value.
@@ -214,6 +236,8 @@ pw_summary <- pw |>
     mean = mean(height), 
     se = sd(height)/ sqrt(length(height)))
 pw_summary
+
+
 ```
 
 Position here is important - the "dodge" puts the columns side by side. You also have to make the error bars dodge. I copied some code for getting them to dodge properly at this webpage.\
@@ -246,7 +270,7 @@ pw |>
 Finally, need to annotate for significance.
 
 ```{r}
-TukeyHSD(model_pw)
+TukeyHSD(model_pw_aov)
 ```
 
 You saw up above this was a lot to pick apart, and we don't need to put a \* or bracket over every pairwise comparison. A shortcut approach is to order the treatment combinations by means from largest to smallest. Based on the height of bars in the plot, this is:
@@ -288,7 +312,7 @@ ggplot(pw_summary) +
   geom_col(position = "dodge") + 
   geom_errorbar(aes(ymin = mean - se, ymax = mean + se), position = position_dodge(0.9), width = 0.2)+
   geom_text(
-    label = c("A", "B", "C", "C", "CD", "D"), 
+    label = c("C", "D", "A", "A", "B", "B"), 
     position = position_dodge(0.9), 
     aes(y = mean+se, x = water), 
     vjust = -0.5, 
