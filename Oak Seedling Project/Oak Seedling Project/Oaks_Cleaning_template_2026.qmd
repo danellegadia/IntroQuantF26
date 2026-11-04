@@ -145,9 +145,10 @@ You may be either examining `SPAD_Data_Raw`, `Height_Data_Raw`, `LICOR_Data_Raw`
 Height_Data_Raw
 
 
-
 aov <- aov(Seedling_Ht_cm ~ Treatment, data = Height_Data_Raw)
 aov
+
+
 ```
 
 In this next chunk, generate a cleaned data set following the example below. As you examine your raw data and find things to fix, add a #Note to create a list of things to fix up. You can then use pipes and write code to fix each thing in your checklist. This is also where if you identified `filters` or data computations in your Hypothesis worksheet (e.g., choose only one species), you can apply those.
@@ -166,8 +167,6 @@ Height_Data <- Height_Data_Raw |>
     na.rm = TRUE)
 
 view(Height_Data)
-  
-  # use notes like this to create a checklist of the things that need to be fixed, then you can fill in code between each line as you fix them. 
 
   #Thing to fix 1: Ignore NA data within the columns 
   #Thing to fix 2: Ignore saplings with neither A or B   
@@ -180,17 +179,32 @@ Repeat the steps you took for your ANOVA data for your second data set of choice
 
 ```{r}
 # View data set
-view(SPAD_Data_Raw)
+view(LICOR_Data_Raw)
+names(LICOR_Data_Raw)
 
-reg <- lm()
 ```
 
 ```{r}
-SPAD_Data <- SPAD_Data_Raw |> 
+reg <- lm(`PORO_gsw_mol+1m-2s-1` ~ Treatment_NA_NA, data = LICOR_Data_Raw)
+reg
+
+LICOR_Data <- LICOR_Data_Raw |> 
+  group_by(Treatment_NA_NA, `PORO_gsw_mol+1m-2s-1`, `PORO_E_apparent_mmol+1m-2s-1`,`FLUORO_ETR_umol+1m-2s-1`, FLUORO_PhiPS2_NA) |> 
+  rename(stomatal_conductance = `PORO_gsw_mol+1m-2s-1`,
+         water_vapor = `PORO_E_apparent_mmol+1m-2s-1`,
+         quantum_efficiancy = FLUORO_PhiPS2_NA,
+         electron_transport_rate = `FLUORO_ETR_umol+1m-2s-1`)
+
+LICOR_Data |> 
+  summarize(
+    mean_electron_transport_rate = mean(electron_transport_rate, na.rm = TRUE)
+  )
+
    
-  #Things to Fix 1
-  #Things to Fix 2
-  #Things to Fix 3
+  #Things to Fix 1: Rename stomatal conductance, E apparent, quantum efficiancy, and electron transport rate.
+  #Things to Fix 2: Create summary statistics for mean
+
+
 ```
 
 ## Exploratory Data Analysis
@@ -210,5 +224,34 @@ Not sure where to start?
 Go for it!
 
 ```{r}
+Height_Data |> 
+  ggplot()+
+  aes(x = Treatment, y = Height)+
+  geom_boxplot()
+#I created this graph to show the relationship between treatment and height. The boxplot graph shows that the NR treatment resulted in the most growth. The SA treatment had the least impact on height. I  chose a boxplot for this graphn to visualize the means, minimum, and maximum of each treatment. 
 
+Height_Data |> 
+  ggplot()+
+  aes(x = Sapling, y = Height)+
+  geom_col()
+#I created this graph to show the relationship between Sapling and height. The histogram  shows that the NA sapling resulted in the most growth. These results show the inconsistency of the data collection and naming conventions. From the data alone, it's difficult to determine if A, A1, A2,A3 are the same sapling. Additionally, it's difficult to understand if the NA sapling was misnamed. Thus, I will not use Sapling as a variable in my data analysis. 
+
+Height_Data |> 
+  ggplot()+
+  aes(x = Height)+
+  geom_histogram()+
+  facet_wrap(~Dead_Alive)
+#I created this graph because I was curious to see the relationship of dead or alive saplings. These graphs show that the NA value has a recorded height. Thus, I will have to do more data cleaning to include NA within the Alive data. 
+
+Height_Data |> 
+  ggplot()+
+  aes(x = Height)+
+  geom_histogram()+
+  facet_wrap(~Block)
+#I created this graph because I was curious to see if blocking affects the sapling height. During a field experiment, each block may be exposed to different environmental factors. Interestingly, each block has different heights. With this information, I will consider block in data analysis. 
+
+
+#My data analysis will work soleley with the Height Data because it is suitable for my questions and interests. Specifically, I will work with height, dead_alive, block, and treatment to understand the relationships that affect height of a plant.
+  
+ 
 ```
