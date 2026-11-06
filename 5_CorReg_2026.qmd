@@ -347,7 +347,8 @@ ggplot(pg)+
   geom_point() + 
   geom_smooth(method = "lm")
 
-#not linear??????
+#not linear?????? no
+#bottom left point makes the line not so linear 
 
 ```
 
@@ -360,11 +361,13 @@ Does our line look better if we transform our independent variable?
 ```{r}
 ggplot(pg)+
   aes(log(nutrient), growth)+
-  geom_point()
+  geom_point()+
+  geom_smooth(method = "lm", se = "FALSE")
 
 ggplot(pg)+
   aes((nutrient), log(growth))+
-  geom_point()
+  geom_point()+
+  geom_smooth(method = "lm", se = "FALSE")
 ```
 
 To fit a linear model, you just plug in the log-transformed variable into the same linear model function that we used before.
@@ -372,13 +375,14 @@ To fit a linear model, you just plug in the log-transformed variable into the sa
 ```{r}
 pg.lm_bad <- lm(growth ~
                   nutrient, data = pg)
-
 #dependent ~ independent 
+#qq plot and residuals plot are badddd
 
 plot(pg.lm_bad)
 
 pg.lm <- lm(growth ~ log(nutrient), data = pg)
 summary(pg.lm)
+#this is a significant relation 3.36-07, 
 ```
 
 How do we apply these calculated coefficients to make a best fit line?
@@ -405,6 +409,7 @@ pg_plot_plusline <- pg_plot +
     se = FALSE)
 
 pg_plot_plusline
+#more readable than the log(nutrient) x axis graph.
 ```
 
 ```{r}
@@ -419,8 +424,11 @@ Then we can also add our text to the plot with the equation and R-squared or wha
 summary(pg.lm)$r.squared
 summary(pg.lm)$coefficients
 
+#using $ extracts the values from pg.lm
+
 pg_plot_plusline + 
   geom_text(x = 30, y= 5, label = "R-squared = 0.95, y = 5.10 ln(x) + 0.69")
+#last line shows how to include text 
 ```
 
 ## Polynomial Regression
@@ -459,6 +467,8 @@ The `I()` tells R to "isolate" that segment and treat it properly here - just a 
 bbel.lm <- lm(abund ~ light + I(light^2), data = bbel)
  
 summary(bbel.lm)
+
+#look at the very last p value for the whole model. other p values in the middle of the table show interactions. stars show significance. 
 ```
 
 Notice how this has given us three estimates - this is for `a`, `b` and `c` in our equation above.
@@ -470,6 +480,8 @@ If we plug these values into our equation above, we get a fitted line with the e
 ```{r}
 bbel_plot +
   geom_smooth(method = "lm", formula = y ~ x + I(x^2), se = FALSE)
+#shows a polynomial fit 
+
 ```
 
 Neat-o!
@@ -513,6 +525,8 @@ glimpse(bff)
 ```{r}
 bff.lm <- lm(count ~ food + nectar, data = bff)
 summary(bff.lm)
+
+#not significant, shows that butterflies relie on more than food and nectar
 ```
 
 ### Viewing the Regression Coefficients
@@ -533,12 +547,17 @@ Beta coefficient for predictor variable FOOD:
 
 ```{r}
 coef(bff.lm)[2] * sd(bff$food) / sd(bff$count)
+
+#beta cof shows the rise/run slope of a graph 
+#not a strong relationship. for every increase of 1 unit of food you get 1.22 butterfles
 ```
 
 Beta coefficient for predictor variable NECTAR:
 
 ```{r}
 coef(bff.lm)["nectar"] * sd(bff$nectar)/sd(bff$count)
+
+#
 ```
 
 So that's all well and good when we only have a few predictor variables, and can drop the ones that aren't significant.
@@ -565,6 +584,10 @@ This function makes a correlation matrix looking at the relationship of each var
 
 ```{r}
 cor(mf) %>% round(2)
+
+#cor calculates correlation coeff
+#don't have to put in the variables, can run the whole datafile 
+#colinearity only matters when its in predictor variables 
 ```
 
 #### Step 2: Select your first variable
@@ -576,6 +599,8 @@ Which factor has the highest absolute value? Let's add that one first and run a 
 ```{r}
 mod <- lm(Length ~ BOD, data = mf)
 summary(mod)
+
+#significant relationship
 ```
 
 #### Step 3: Decide if additional variables are appropriate using stepwise testing.
@@ -587,10 +612,12 @@ fit1 <- lm(Length ~ BOD, data=mf)
 fit1 <- lm(Length ~ Algae, data=mf)
 summary(fit1)
 fit2 <- lm(Length ~ BOD +  Algae, data=mf)
+#
 
 plot(BOD ~ Algae, data = mf)
 summary(fit2)
 anova(fit1, fit2)
+#second model of anova is better
 ```
 
 #### Step 4: Assess model fit and results
@@ -602,7 +629,13 @@ Why weren't the other variables significant anymore?
 Look back at the correlation matrix.
 
 ```{r}
-cor(mf)
+cor(mf) |> round(2)
+
+model_more <- lm(Length ~ BOD * NO3, mf)
+summary(model_more)
+
+model_more <- lm(Length ~ BOD * Speed, mf)
+summary(model_more)
 ```
 
 ### Step 5: Report results

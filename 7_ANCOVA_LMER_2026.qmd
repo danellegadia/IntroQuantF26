@@ -34,6 +34,8 @@ All_Terr_Data <- bind_rows(TC_Terr2023, CDM_Terr2022, FenbergTerr) |>
     location == "Protected" ~ "far", 
     location == "Exploited" ~ "near", 
     TRUE ~ as.character(location)))
+
+
 ```
 
 We have previously established that owl limpet territory sizes have a linear relationship between log(body mass) and log(territory size) at Treasure Cove.
@@ -44,6 +46,7 @@ TC_Terr2023 |>
   aes(x = log(mass_g), y = log(area_mm2)) + 
   geom_point() + 
   geom_smooth(method = "lm", se = FALSE)
+#there is a linear relationship  beween log body mass and log area 
 ```
 
 We can calculate the best fit line, the proportion of the variation explained, and our confidence in this model (our p-value, by proxy).
@@ -51,6 +54,7 @@ We can calculate the best fit line, the proportion of the variation explained, a
 ```{r}
 TCModel_linear <- lm(log(area_mm2) ~ log(mass_g), data = TC_Terr2023)
 summary(TCModel_linear)
+
 ```
 
 ### ANCOVA: Accounting for a covariate in a linear model
@@ -67,6 +71,8 @@ One approach would be to examine each variable in our model for differences:
 TCModel_massANOVA <- lm(log(mass_g) ~ location, data = TC_Terr2023)
 
 summary(TCModel_massANOVA)
+
+#mass does not vary by location. 
 ```
 
 #### ANOVA 2: Did territory area vary by location (near/far) within the site, for the limpets measured for the territories?
@@ -74,6 +80,8 @@ summary(TCModel_massANOVA)
 ```{r}
 TCModel_areaANOVA <- lm(log(area_mm2) ~ location, data = TC_Terr2023)
 summary(TCModel_areaANOVA)
+
+#a slight difference. more tests give a false positve. 
 ```
 
 Hmm, it looks like it did, but this doesn't tell us much. A better approach is to incorporate location into our model and examine both at the same time.
@@ -84,6 +92,8 @@ Hmm, it looks like it did, but this doesn't tell us much. A better approach is t
 TCModel_ANCOVA_withInt <- lm(log(area_mm2) ~ log(mass_g) * location, data = TC_Terr2023)
 
 summary(TCModel_ANCOVA_withInt)
+
+#want to test the interaction. and if the realtionship is not significant, then you drop it. the results tell us that the signficant linear relationship with mass. log(mass_g):locationnear  this shows that the relationship is not signficiant 
 ```
 
 These results mean:
@@ -103,6 +113,8 @@ TC_Terr2023 |>
   geom_point() + 
   geom_smooth(method = "lm", se = FALSE) 
 
+#the slope doesn't differ by much. because there isnt a significant interaction, we remvove it from the model. 
+
 ```
 
 Since there was not a significant interaction, we should remove that from the model.
@@ -111,6 +123,8 @@ Since there was not a significant interaction, we should remove that from the mo
 TCModel_noInt <- lm(log(area_mm2) ~ log(mass_g) + location, data = TC_Terr2023)
 
 summary(TCModel_noInt)
+
+#interaction change from star to plus sign. now location is signficant again.
 ```
 
 The difference between locations is significant now! What's up with that?
@@ -150,6 +164,7 @@ Since the interaction in this model was not significant, and we do not have equa
 
 ```{r}
 car::Anova(TCModel_noInt, type = "II")
+#we did not have equal ssampling so cant use type 1
 ```
 
 ## Comparing models using AIC
@@ -160,6 +175,8 @@ Which of the model formulations that we tried above is the best fit model?
 
 ```{r}
 AIC(TCModel_linear, TCModel_massANOVA, TCModel_areaANOVA, TCModel_ANCOVA_withInt, TCModel_noInt) |> kableExtra::kable()
+
+#the lowest value AIC is the (noInt) is the best fit model. 
 ```
 
 Our best model has the lowest AIC score.
@@ -175,6 +192,8 @@ Even though this model is a lot better than just a raw linear model without cova
 ```{r}
 AllSiteModel_linear <- lm(log(area_mm2) ~ log(mass_g), data = All_Terr_Data)
 summary(AllSiteModel_linear)
+
+#
 ```
 
 If we incorporate site with interactions (TC, CDM, Fenberg), we get this model:
@@ -182,6 +201,8 @@ If we incorporate site with interactions (TC, CDM, Fenberg), we get this model:
 ```{r}
 AllSiteModel_ANCOVA_withInt <- lm(log(area_mm2) ~ log(mass_g) * site, data = All_Terr_Data)
 summary(AllSiteModel_ANCOVA_withInt)
+
+
 ```
 
 1.  There is a linear relationship between log mass and area.
@@ -209,6 +230,8 @@ If our sites are just replicates, and they could be interchangeable with any old
 ```{r}
 AllSiteModel_site_random <- lmer(log(area_mm2) ~ log(mass_g) + (1|site), data = All_Terr_Data)
 summary(AllSiteModel_site_random)
+
+
 ```
 
 This output looks very different! Instead of a table of coefficients, we get a table of [Fixed Effects]{.underline}, and our Random effects are separated in their own table. The model will never look for interactions with random effects, so we don't have to worry about that. The significance is the same though!
@@ -220,7 +243,7 @@ AllSiteModel_LocInt_randSite <- lmer(log(area_mm2) ~ log(mass_g) * location + (1
 summary(AllSiteModel_LocInt_randSite)
 ```
 
-The interaction is significant, so we'll drop it for a better model:
+The interaction isn't significant, so we'll drop it for a better model:
 
 ```{r}
 AllSiteModel_LocnoInt_rSite <- lmer(log(area_mm2) ~ log(mass_g) + location + (1|site), data = All_Terr_Data)
@@ -275,6 +298,8 @@ cAIC(AllSiteModel_LocInt_randSite)$caic,
 cAIC(AllSiteModel_LocnoInt_rSite)$caic)
 
 
+
+
 summary(AllSiteModel_ANCOVA_noInt)
 summary(AllSiteModel_LocnoInt_rSite)
 ```
@@ -286,6 +311,8 @@ ggplot(All_Terr_Data) +
   aes(x = log(mass_g), log(area_mm2), color = site, shape = location) +
   geom_point() +
   geom_smooth(method = "lm", se = FALSE)
+
+#show that there is likely due to chance. 
 ```
 
 It looks like TC is the only one where there might be a difference - it likely was due to chance, considering that relationship wasn't replicated elsewhere! Good thing we looked at multiple sites before we came to any conclusions.
@@ -298,6 +325,8 @@ There are a few differences in reporting LMER - you don't have to discuss the ra
 summary(AllSiteModel_LocnoInt_rSite)
 library(sjPlot)
 plot_model(AllSiteModel_LocnoInt_rSite) + geom_hline(aes(yintercept = 0), linetype = "dotted")
+
+#fixed effect est for mass is diff from 0. sure that mass has effect on area. whereas location has 0within error bars. 
 ```
 
 If the fixed effect estimate is greater than 0, and the standard error bars don't overlap zero, you can be confident that there is a positive relationship for that variable. (and vice versa for a negative relationship).
