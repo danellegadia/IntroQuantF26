@@ -4,23 +4,47 @@ format: typst
 editor: visual
 ---
 
-## Quarto
+## SPAM Data Analysis 
 
-Quarto enables you to weave together content and executable code into a finished document. To learn more about Quarto see <https://quarto.org>.
+Soil Plant Assisted Migration (SPAM) data analysis using Subproject 4 data from previous year's (2025) data collection. Data from Subproject 4 was collected to understand the success of microbial dust spread among California native plants within Crystal Cove State Park.
 
-## Running Code
-
-When you click the **Render** button a document will be generated that includes both content and the output of embedded code. You can embed code like this:
+## Loading Packages
 
 ```{r}
-1 + 1
+library(tidyverse)
+library(readxl)
 ```
 
-You can add options to executable code like this
+## Importing Data
 
 ```{r}
-#| echo: false
-2 * 2
+SubProject4 <- 
+  read_excel("Copy of SPAM SubProject 4 Inoculated Seeded Plots (1).xlsx", 
+             sheet = "GroundCover1" and "GroundCover2")
+
+#note to self: make sure to include the other ground cover and plant density sheets. can i combine the sheets?
+#for now, the draft EDA includes only sheet 1(ground cover1).
 ```
 
-The `echo: false` option disables the printing of code (only output is displayed).
+## Exploratory Data Analysis 
+
+```{r}
+#What am I working with? How much data was recorded? Was the data recorded consistently? 
+#Which variables do I care about? - Plot(i), Ground Code (i), Ground Cover Percent (d)
+#Does plot/treatment type affect the ground cover percent?
+#What was the relationship 
+
+view(SubProject4)
+```
+
+## ANOVA Analysis
+
+```{r}
+
+```
+
+## Regression Analysis
+
+```{r}
+
+```
