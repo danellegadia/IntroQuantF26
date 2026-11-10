@@ -67,7 +67,10 @@ ggplot(SubProject4) +
 ## Data Cleaning
 
 ```{r}
-#note to self: consider grouping plot by the different treatments or number. I'm not sure if that will help the visualization or make it worse. consider grouping species code for either invasive or native species. hm which ones should I use? 
+cleaned_SP4 <- SubProject4 |> 
+  group_by(Plot, `Spp Height`, `Species Code`) |> 
+  mutate(invasive = BRAGNIG, HIRINC, ANAARV)
+#note to self: consider grouping plot by the different treatments or number. I'm not sure if that will help the visualization or make it worse. consider grouping species code for either invasive or native species. hm which ones should I use? when should I use ungroup??? hm a species code sheet would be helpful, last year did not make one. include species code into metadata for this year!
 
 ```
 
@@ -89,7 +92,7 @@ ggpubr::ggqqplot(residuals(model))
 
 
 
-SubProject4 %>% rstatix::levene_test(`Spp Height` ~ `Species Code` * Plot)
+SubProject4 |> rstatix::levene_test(`Spp Height` ~ `Species Code` + Plot)
 #levene's test/test of variance. 
 #note to self: this doesn't work? but why?
 
@@ -152,16 +155,18 @@ ggplot(SubProject4)+
 model_lm <- lm(`Spp Height` ~ `Species Code` + Plot, SubProject4) 
 summary(model_lm)
 #statistical test
-#BRANIG has a signifcant p value, 0.0283. 
+#BRANIG, NUTTEX, and no dust have a significant p value < 0.05. Inland dust has a greater strength signifcance, with a p value of 0.0017. Because the model p value is 8.923e-10, I can reject the null hypothesis. This means that the model is statistically significant. 
 ```
 
 ```{r}
-#figures
-
 lm <- ggplot(SubProject4) + 
   aes(Plot , `Spp Height`) +
   geom_point()
 
 lm +
   geom_smooth(method = "lm", se = FALSE)
+#figure
+#Some plots had more growth than other plots, that could be due to the species in the plot. If plots contained woody species, the species height is generally higher compared to a herbaceous species. 
+
+
 ```
