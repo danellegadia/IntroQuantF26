@@ -392,10 +392,10 @@ Want to rekey some of the values themselves, based on certain conditions? `case_
 # the last line tells R to keep any other values the same. 
 
 titanic |> 
-  mutate(Embarked = case_when(
-    Embarked == "C" ~ "Cherbourg",
-    Embarked == "Q" ~ "Queenstown", 
-    Embarked == "S" ~ "Southampton"
+  mutate(`Species Code` = case_when(
+    `Species Code` == "C" ~ "Cherbourg",
+    `Species Code` == "Q" ~ "Queenstown", 
+    `Species Code` == "S" ~ "Southampton"
   ))
 ```
 

@@ -43,15 +43,15 @@ summary
 ## Exploratory Data Analysis
 
 ```{r}
-#time to make graphs yay. these are a work in progress :)
+#time to make graphs and check out what data looks like
 
 view(SubProject4)
 
 ggplot(SubProject4) +
   aes(x = `Species Code`, y = `Spp Height`, color = Plot) +
   geom_boxplot()
-#wow a colorful mess
-
+#wow a colorful mess. 
+    
 ggplot(SubProject4) +
   aes(y = `Spp Height`) +
   geom_histogram()+
@@ -61,6 +61,14 @@ ggplot(SubProject4) +
 ggplot(SubProject4) +
   aes(x = Plot, y = `Spp Height`) +
   geom_jitter()
+#a little better? I can hardly even read the plot names. is there is a way to work around so much data that was collect. 
+```
+
+## Data Cleaning
+
+```{r}
+#note to self: consider grouping plot by the different treatments or number. I'm not sure if that will help the visualization or make it worse. consider grouping species code for either invasive or native species. hm which ones should I use? 
+
 ```
 
 ## ANOVA Analysis
@@ -72,31 +80,35 @@ ggplot(SubProject4) +
 #graph
 #normality test
 
-#test of normality
-#yay looks normal yay
+
 model  <- lm(`Spp Height` ~ `Species Code` + Plot, data = SubProject4)
 plot(model)
 ggpubr::ggqqplot(residuals(model))
+#test of normality
+#Subproject 4 data does not look normal from the residuals vs fitted graph. The residuals vs fitted graph shows heterscadisity. The qq plot does not show normal data.
 
-#levene's test/test of variance
-SubProject4 %>% rstatix::levene_test(`Spp Height` ~ `Species Code` + Plot)
 
+
+SubProject4 %>% rstatix::levene_test(`Spp Height` ~ `Species Code` * Plot)
+#levene's test/test of variance. 
+#note to self: this doesn't work? but why?
 
 
 ```
 
 ```{r}
-#statistical test
 
 model_aov<- aov(`Spp Height` ~ `Species Code` + Plot, SubProject4)
 summary(model_aov)
+#statistical test
+#The summary table shows that species code has a significant effect on plant height(p value 5.86e-11). Plot has a significant effect of plant height (p value 0.0342) but not as strong as species code. This makes sense, each species has a differnt average growth height. 
+
 
 TukeyHSD(model_aov)
+#note to self: this doesn't work. what? why?
 ```
 
 ```{r}
-#figures
-
 summary_stats <- SubProject4 |> 
   group_by(Plot, `Species Code`) |> 
   summarize(mean_height = mean(`Spp Height`, na.rm = TRUE),
@@ -104,6 +116,9 @@ summary_stats <- SubProject4 |>
             n = n(),
             se_height = sd_height/sqrt(n))
 summary_stats
+#summary stat table. 
+#note to self:not helpful, consider grouping by plot number, plot treatment, invasive or native species.
+
 
 ggplot(summary_stats) + 
   aes(x = Plot, y = mean_height, fill = `Species Code`) + 
@@ -111,24 +126,42 @@ ggplot(summary_stats) +
   geom_errorbar(
     aes(
       ymin = mean_height - se_height, ymax = mean_height + se_height), width = 0.2)
-#wooooowwwwwww so colorful 
+#figures
+#Graph makes sense because an ARTCAL would definitely be larger than a phacelia species.
+#note to self: consider grouping or removing soem of the species code or the plot. 
 ```
 
 ## Regression Analysis
 
 ```{r}
-#a graph with best fit line, p value, r squared reported on graph
+model_lm <- lm(`Spp Height` ~ `Species Code` + Plot, SubProject4) 
+plot(model_lm)
+summary(model_lm)
 #normality test
+#From the Residuals vs Fitted graph, it does not show homoscedasticity. The spread is not the same across the horizontal line on the graph. The qq plot also shows the data is not normal. 
 
-mayfly.lm <- lm(Abund ~ Speed, data = mayfly) 
-#abundance is response. speed is predictor. 
-plot(mayfly.lm)
+
+ggplot(SubProject4)+
+  aes((`Species Code`), log(`Spp Height`))+
+  geom_col()
+#lets tranform
+#note to self: gosh this isn't helpful. how and why are some of the values below 0?
 ```
 
 ```{r}
+model_lm <- lm(`Spp Height` ~ `Species Code` + Plot, SubProject4) 
+summary(model_lm)
 #statistical test
+#BRANIG has a signifcant p value, 0.0283. 
 ```
 
 ```{r}
 #figures
+
+lm <- ggplot(SubProject4) + 
+  aes(Plot , `Spp Height`) +
+  geom_point()
+
+lm +
+  geom_smooth(method = "lm", se = FALSE)
 ```
