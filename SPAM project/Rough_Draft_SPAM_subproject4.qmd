@@ -4,7 +4,7 @@ format: typst
 editor: visual
 ---
 
-## SPAM Data Analysis 
+## SPAM Data Analysis
 
 Soil Plant Assisted Migration (SPAM) data analysis using Subproject 4 data from previous year's (2025) data collection. Data from Subproject 4 was collected to understand the success of microbial dust spread among California native plants within Crystal Cove State Park.
 
@@ -13,6 +13,8 @@ Soil Plant Assisted Migration (SPAM) data analysis using Subproject 4 data from 
 ```{r}
 library(tidyverse)
 library(readxl)
+install.packages("ggpubr")
+install.packages("ggsignif")
 ```
 
 ## Importing Data
@@ -20,31 +22,113 @@ library(readxl)
 ```{r}
 SubProject4 <- 
   read_excel("Copy of SPAM SubProject 4 Inoculated Seeded Plots (1).xlsx", 
-             sheet = "GroundCover1" and "GroundCover2")
-
-#note to self: make sure to include the other ground cover and plant density sheets. can i combine the sheets?
-#for now, the draft EDA includes only sheet 1(ground cover1).
+             sheet = "PlantDensity1")
 ```
 
-## Exploratory Data Analysis 
+## Summary Table
 
 ```{r}
-#What am I working with? How much data was recorded? Was the data recorded consistently? 
-#Which variables do I care about? - Plot(i), Ground Code (i), Ground Cover Percent (d)
-#Does plot/treatment type affect the ground cover percent?
-#What was the relationship 
+#include measures of center and variability, sample sizes, and statistical test results 
+
+summary <- SubProject4 |> 
+  group_by(Plot,`Species Code`,`Spp Count`, `Spp Height`) |> 
+  summarize(mean_height = mean(`Spp Height`, na.rm = TRUE),
+            sd_height = sd(`Spp Height`, na.rm = TRUE),
+            n = n(),
+            se_height = sd_height/sqrt(n))
+
+summary
+```
+
+## Exploratory Data Analysis
+
+```{r}
+#time to make graphs yay. these are a work in progress :)
 
 view(SubProject4)
+
+ggplot(SubProject4) +
+  aes(x = `Species Code`, y = `Spp Height`, color = Plot) +
+  geom_boxplot()
+#wow a colorful mess
+
+ggplot(SubProject4) +
+  aes(y = `Spp Height`) +
+  geom_histogram()+
+  facet_grid(~`Species Code`)
+#still a mess
+
+ggplot(SubProject4) +
+  aes(x = Plot, y = `Spp Height`) +
+  geom_jitter()
 ```
 
 ## ANOVA Analysis
 
 ```{r}
+#1 anova analysis that includes both treatment variables and blocking on the response variable 
+#test of assumptions should be fully described
+#results of tests with interactions should be reported in ANOVA table 
+#graph
+#normality test
 
+#test of normality
+#yay looks normal yay
+model  <- lm(`Spp Height` ~ `Species Code` + Plot, data = SubProject4)
+plot(model)
+ggpubr::ggqqplot(residuals(model))
+
+#levene's test/test of variance
+SubProject4 %>% rstatix::levene_test(`Spp Height` ~ `Species Code` + Plot)
+
+
+
+```
+
+```{r}
+#statistical test
+
+model_aov<- aov(`Spp Height` ~ `Species Code` + Plot, SubProject4)
+summary(model_aov)
+
+TukeyHSD(model_aov)
+```
+
+```{r}
+#figures
+
+summary_stats <- SubProject4 |> 
+  group_by(Plot, `Species Code`) |> 
+  summarize(mean_height = mean(`Spp Height`, na.rm = TRUE),
+            sd_height = sd(`Spp Height`, na.rm = TRUE),
+            n = n(),
+            se_height = sd_height/sqrt(n))
+summary_stats
+
+ggplot(summary_stats) + 
+  aes(x = Plot, y = mean_height, fill = `Species Code`) + 
+  geom_col() + 
+  geom_errorbar(
+    aes(
+      ymin = mean_height - se_height, ymax = mean_height + se_height), width = 0.2)
+#wooooowwwwwww so colorful 
 ```
 
 ## Regression Analysis
 
 ```{r}
+#a graph with best fit line, p value, r squared reported on graph
+#normality test
 
+mayfly.lm <- lm(Abund ~ Speed, data = mayfly) 
+#abundance is response. speed is predictor. 
+plot(mayfly.lm)
+```
+
+```{r}
+#statistical test
+```
+
+```{r}
+#figures
 ```
