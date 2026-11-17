@@ -144,9 +144,52 @@ You may be either examining `SPAD_Data_Raw`, `Height_Data_Raw`, `LICOR_Data_Raw`
 ```{r}
 Height_Data_Raw
 
+#data cleaning
+#many rows of all NAs. Dead seedlings all have a height of 0 and should have been removed. Typos in treatment name (OA and OS are the same thing) should have been fixed.
 
-aov <- aov(Seedling_Ht_cm ~ Treatment, data = Height_Data_Raw)
-aov
+#1 remove na
+#2 remove 0 in dead seedling 
+#3 rename oa to os. all treatments need to be ac, dt, os, nr
+
+Height_cleaned <- Height_Data_Raw |> 
+  drop_na(Seedling_Ht_cm, Block, Sapling_AB_etc, Treatment) |> 
+  rename(Sapling = Sapling_AB_etc, 
+         Height = Seedling_Ht_cm) 
+  
+Height_cleaned |> 
+  mutate(Treatments = case_when(
+    Treatment == "OA" ~ "OS",
+    is.character(Treatment) == TRUE ~ Treatment
+  ))
+
+
+# mutate(NewColName = case_when( 
+#     Variable == "old value" ~ "new value", 
+#     Variable == "different old value" ~ "different new value", 
+#     is.character(Variable) == TRUE ~ Variable
+
+# the last line tells R to keep any other values the same. 
+
+titanic |> 
+  mutate(`Species Code` = case_when(
+    `Species Code` == "C" ~ "Cherbourg",
+    `Species Code` == "Q" ~ "Queenstown", 
+    `Species Code` == "S" ~ "Southampton"
+  ))
+
+
+
+Height_Data <- Height_Data_Raw |> 
+  rename(Sapling = Sapling_AB_etc, 
+         Height = Seedling_Ht_cm) |> 
+  mutate(Sapling, Height, 
+         na.rm = TRUE)
+
+view(Height_Data)
+
+#Thing to fix 1: Ignore NA data within the columns 
+#Thing to fix 2: Ignore saplings with neither A or B   
+#Thing to fix 3: Rename columns 
 
 
 ```
@@ -160,17 +203,10 @@ Read about joins here: <https://r4ds.hadley.nz/joins>
 Check out the illustrative animations on this page: <https://github.com/gadenbuie/tidyexplain?tab=readme-ov-file#mutating-joins>
 
 ```{r}
-Height_Data <- Height_Data_Raw |> 
-  rename(Sapling = Sapling_AB_etc, 
-         Height = Seedling_Ht_cm) |> 
-  mutate(Sapling, Height, 
-    na.rm = TRUE)
 
-view(Height_Data)
+aov <- aov(Seedling_Ht_cm ~ Treatment, data = Height_Data_Raw)
+aov
 
-  #Thing to fix 1: Ignore NA data within the columns 
-  #Thing to fix 2: Ignore saplings with neither A or B   
-  #Thing to fix 3: Rename columns 
 ```
 
 ### Regression dataset
