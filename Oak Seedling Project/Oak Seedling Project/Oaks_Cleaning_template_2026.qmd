@@ -157,11 +157,12 @@ Height_cleaned <- Height_Data_Raw |>
          Height = Seedling_Ht_cm) 
   
 Height_cleaned |> 
-  mutate(Treatments = case_when(
+  mutate(Treatment_Plot = case_when(
     Treatment == "OA" ~ "OS",
-    is.character(Treatment) == TRUE ~ Treatment
-  ))
+    is.character(Treatment) == TRUE ~ Treatment))
 
+Height_cleaned |> 
+  mutate()
 
 # mutate(NewColName = case_when( 
 #     Variable == "old value" ~ "new value", 
