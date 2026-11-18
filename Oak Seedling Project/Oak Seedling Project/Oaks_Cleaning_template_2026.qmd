@@ -166,6 +166,7 @@ Height_cleaned |>
 
 view(Height_cleaned)
 
+
 ```
 
 In this next chunk, generate a cleaned data set following the example below. As you examine your raw data and find things to fix, add a #Note to create a list of things to fix up. You can then use pipes and write code to fix each thing in your checklist. This is also where if you identified `filters` or data computations in your Hypothesis worksheet (e.g., choose only one species), you can apply those.
@@ -179,8 +180,9 @@ Check out the illustrative animations on this page: <https://github.com/gadenbui
 ```{r}
 #anova analysis 
 aov <- aov(Height ~ Treatment, data = Height_cleaned)
-aov
+summary(aov)
 
+#P-value is 0.749, this means I fail to reject the null hypothesis. The null hypothesis is that height would not differ between treatments. The alternative hypothesis is that the height will differ among different treatments. 
 ```
 
 ### Regression Dataset
@@ -188,33 +190,46 @@ aov
 Repeat the steps you took for your ANOVA data for your second data set of choice.
 
 ```{r}
-# View data set
-view(LICOR_Data_Raw)
-names(LICOR_Data_Raw)
+#data cleaning 
+
+#1: remove column of entered data + duplicate columns
+#2: rename column names
+#3: remove na
+#4: filter for only alive seedlings
+#5: change the variables from chacters to numeric
+
+
+LICOR_cleaned <- LICOR_Data_Raw |> 
+  rename(stomatal_conductance = `PORO_gsw_mol+1m-2s-1`,
+         water_vapor = `PORO_E_apparent_mmol+1m-2s-1`,
+         quantum_efficiancy = FLUORO_PhiPS2_NA,
+         electron_transport_rate = `FLUORO_ETR_umol+1m-2s-1`,
+         Treatment = Treatment_NA_NA,
+         Sapling = Sapling_AB_etc_NA_NA,
+         Survivorship = Dead_Alive_NA_NA) |> 
+  drop_na(stomatal_conductance, 
+          water_vapor, 
+          quantum_efficiancy, 
+          electron_transport_rate, 
+          Treatment, Sapling, Survivorship) |> 
+  select(stomatal_conductance, water_vapor, 
+         quantum_efficiancy, electron_transport_rate, 
+         Treatment, Sapling, Survivorship)
+
+glimpse(LICOR_cleaned)
+
+LICOR_cleaned |> 
+  mutate(across(stomatal_conductance:electron_transport_rate, as.numeric))
 
 ```
 
 ```{r}
-reg <- lm(`PORO_gsw_mol+1m-2s-1` ~ Treatment_NA_NA, data = LICOR_Data_Raw)
-reg
+#regression analysis 
 
-LICOR_Data <- LICOR_Data_Raw |> 
-  group_by(Treatment_NA_NA, `PORO_gsw_mol+1m-2s-1`, `PORO_E_apparent_mmol+1m-2s-1`,`FLUORO_ETR_umol+1m-2s-1`, FLUORO_PhiPS2_NA) |> 
-  rename(stomatal_conductance = `PORO_gsw_mol+1m-2s-1`,
-         water_vapor = `PORO_E_apparent_mmol+1m-2s-1`,
-         quantum_efficiancy = FLUORO_PhiPS2_NA,
-         electron_transport_rate = `FLUORO_ETR_umol+1m-2s-1`)
+reg <- lm(stomatal_conductance ~ Treatment, data = LICOR_cleaned)
+summary(reg)
 
-LICOR_Data |> 
-  summarize(
-    mean_electron_transport_rate = mean(electron_transport_rate, na.rm = TRUE)
-  )
-
-   
-  #Things to Fix 1: Rename stomatal conductance, E apparent, quantum efficiancy, and electron transport rate.
-  #Things to Fix 2: Create summary statistics for mean
-
-
+#P-value is 0.1452, this means I fail to reject the null hypothesis. The null hypothesis is that treatment does not affect stomatal conductance. The alternative hypothesis is that treatment does affect stomatal conductance. 
 ```
 
 ## Exploratory Data Analysis
@@ -234,24 +249,30 @@ Not sure where to start?
 Go for it!
 
 ```{r}
-Height_Data |> 
+Height_cleaned |> 
   ggplot()+
   aes(x = Treatment, y = Height)+
   geom_boxplot()
-#I created this graph to show the relationship between treatment and height. The boxplot graph shows that the NR treatment resulted in the most growth. The SA treatment had the least impact on height. I  chose a boxplot for this graphn to visualize the means, minimum, and maximum of each treatment. 
+#I created this graph to show the relationship between treatment and height. The boxplot graph shows that the mean height for each of the treatments are similar, roughly 12 to 13. This graph shows that both of the OA and AC treatments have outliers. The AC treatment has a significantly smaller box, representing that there is less variability in the observations. I  chose a boxplot for this graphn to visualize the means, minimum, and maximum of each treatment. 
 
-Height_Data |> 
+Height_cleaned |> 
   ggplot()+
   aes(x = Sapling, y = Height)+
   geom_col()
 #I created this graph to show the relationship between Sapling and height. The histogram  shows that the NA sapling resulted in the most growth. These results show the inconsistency of the data collection and naming conventions. From the data alone, it's difficult to determine if A, A1, A2,A3 are the same sapling. Additionally, it's difficult to understand if the NA sapling was misnamed. Thus, I will not use Sapling as a variable in my data analysis. 
+
+#irissa notes - I'm confused about this graph. The letters were used as identifiers when there were multiple saplings under a tag number and thus there are multiple sapling As so what you've plotted along the x axis doesn't refer to unique individuals. NA would be when there was only 1 sapling in the ring and no letter identifier was needed.
 
 Height_Data |> 
   ggplot()+
   aes(x = Height)+
   geom_histogram()+
   facet_wrap(~Dead_Alive)
-#I created this graph because I was curious to see the relationship of dead or alive saplings. These graphs show that the NA value has a recorded height. Thus, I will have to do more data cleaning to include NA within the Alive data. 
+#I created this graph because I was curious to see the relationship of dead or alive saplings. This graph shows that the NA value has a recorded height. Thus, I will have to do more data cleaning to include NA within the Alive data. 
+
+#irissa notes -You did an extra graph so I didn't take off a whole point but your dead vs. alive graph of seedling heights doesn't make ecological sense as dead seedlings all have a height of 0. Looking at blocks also doesn't mean much ecologically as they just served as replicates for us. Next time try to talk more about the trends you see in the data/figure rather than just the variables that the graph shows.
+
+
 
 Height_Data |> 
   ggplot()+
