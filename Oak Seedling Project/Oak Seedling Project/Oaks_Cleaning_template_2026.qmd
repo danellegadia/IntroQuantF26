@@ -142,56 +142,29 @@ In this section we will look at and clean up each of the data sets you identifie
 You may be either examining `SPAD_Data_Raw`, `Height_Data_Raw`, `LICOR_Data_Raw`, or `Moist_Data_Raw` for your ANOVA question. Examine your data set using the diagnostic functions I've given you above in the How to Examine and Clean Data section.
 
 ```{r}
-Height_Data_Raw
-
 #data cleaning
-#many rows of all NAs. Dead seedlings all have a height of 0 and should have been removed. Typos in treatment name (OA and OS are the same thing) should have been fixed.
 
 #1 remove na
-#2 remove 0 in dead seedling 
-#3 rename oa to os. all treatments need to be ac, dt, os, nr
+#2 rename columns of height and sapling 
+#3 rename oa to os in treatments. all treatments need to be ac, dt, os, nr.
+#4 reclassify A1,A2,A3 in sapling column
 
 Height_cleaned <- Height_Data_Raw |> 
   drop_na(Seedling_Ht_cm, Block, Sapling_AB_etc, Treatment) |> 
   rename(Sapling = Sapling_AB_etc, 
-         Height = Seedling_Ht_cm) 
-  
-Height_cleaned |> 
+         Height = Seedling_Ht_cm) |> 
   mutate(Treatment_Plot = case_when(
     Treatment == "OA" ~ "OS",
-    is.character(Treatment) == TRUE ~ Treatment))
+    is.character(Treatment) == TRUE ~ Treatment)) 
 
 Height_cleaned |> 
-  mutate()
+  mutate(Sapling = case_when(
+    Sapling == "A1" ~ "A",
+    Sapling == "A2" ~ "B",
+    Sapling == "A3" ~ "C", 
+    is.character(Sapling) == TRUE ~ Sapling))
 
-# mutate(NewColName = case_when( 
-#     Variable == "old value" ~ "new value", 
-#     Variable == "different old value" ~ "different new value", 
-#     is.character(Variable) == TRUE ~ Variable
-
-# the last line tells R to keep any other values the same. 
-
-titanic |> 
-  mutate(`Species Code` = case_when(
-    `Species Code` == "C" ~ "Cherbourg",
-    `Species Code` == "Q" ~ "Queenstown", 
-    `Species Code` == "S" ~ "Southampton"
-  ))
-
-
-
-Height_Data <- Height_Data_Raw |> 
-  rename(Sapling = Sapling_AB_etc, 
-         Height = Seedling_Ht_cm) |> 
-  mutate(Sapling, Height, 
-         na.rm = TRUE)
-
-view(Height_Data)
-
-#Thing to fix 1: Ignore NA data within the columns 
-#Thing to fix 2: Ignore saplings with neither A or B   
-#Thing to fix 3: Rename columns 
-
+view(Height_cleaned)
 
 ```
 
@@ -204,13 +177,13 @@ Read about joins here: <https://r4ds.hadley.nz/joins>
 Check out the illustrative animations on this page: <https://github.com/gadenbuie/tidyexplain?tab=readme-ov-file#mutating-joins>
 
 ```{r}
-
-aov <- aov(Seedling_Ht_cm ~ Treatment, data = Height_Data_Raw)
+#anova analysis 
+aov <- aov(Height ~ Treatment, data = Height_cleaned)
 aov
 
 ```
 
-### Regression dataset
+### Regression Dataset
 
 Repeat the steps you took for your ANOVA data for your second data set of choice.
 

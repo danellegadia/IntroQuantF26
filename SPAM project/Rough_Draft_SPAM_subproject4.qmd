@@ -22,7 +22,30 @@ install.packages("ggsignif")
 ```{r}
 SubProject4 <- 
   read_excel("Copy of SPAM SubProject 4 Inoculated Seeded Plots (1).xlsx", 
-             sheet = "PlantDensity1")
+             sheet = "PlantDensity1") 
+
+SpeciesList<-
+  read_excel("MainSpeciesListOCVeg.xlsx") |> 
+  select(Code, Nativity) |> 
+  rename(`Species Code` = Code)
+  
+```
+
+## Data Cleaning
+
+```{r}
+cleaned_SP4 <- SubProject4 |> 
+  group_by(Plot, `Spp Height`, `Species Code`) |> 
+  separate(Plot, into = c("Plot", "Treatment", by = " "))
+
+SP4_SpeciesList = cleaned_SP4 |>  
+  full_join(SpeciesList, by == "Species Code")
+
+#to do from amy - join with species list
+#spp code is the blocking factor not treatment.
+
+#note to self:
+
 ```
 
 ## Summary Table
@@ -30,12 +53,13 @@ SubProject4 <-
 ```{r}
 #include measures of center and variability, sample sizes, and statistical test results 
 
-summary <- SubProject4 |> 
-  group_by(Plot,`Species Code`,`Spp Count`, `Spp Height`) |> 
+summary <- SP4_SpeciesList |> 
+  group_by(`Species Code`, Treatment) |> 
   summarize(mean_height = mean(`Spp Height`, na.rm = TRUE),
             sd_height = sd(`Spp Height`, na.rm = TRUE),
             n = n(),
-            se_height = sd_height/sqrt(n))
+            se_height = sd_height/sqrt(n),
+            mean_count = mean(`Spp Count`))
 
 summary
 ```
@@ -45,9 +69,7 @@ summary
 ```{r}
 #time to make graphs and check out what data looks like
 
-view(SubProject4)
-
-ggplot(SubProject4) +
+ggplot(cleaned_SP4) +
   aes(x = `Species Code`, y = `Spp Height`, color = Plot) +
   geom_boxplot()
 #wow a colorful mess. 
@@ -64,16 +86,6 @@ ggplot(SubProject4) +
 #a little better? I can hardly even read the plot names. is there is a way to work around so much data that was collect. 
 ```
 
-## Data Cleaning
-
-```{r}
-cleaned_SP4 <- SubProject4 |> 
-  group_by(Plot, `Spp Height`, `Species Code`) |> 
-  mutate(invasive = BRAGNIG, HIRINC, ANAARV)
-#note to self: consider grouping plot by the different treatments or number. I'm not sure if that will help the visualization or make it worse. consider grouping species code for either invasive or native species. hm which ones should I use? when should I use ungroup??? hm a species code sheet would be helpful, last year did not make one. include species code into metadata for this year!
-
-```
-
 ## ANOVA Analysis
 
 ```{r}
@@ -84,9 +96,10 @@ cleaned_SP4 <- SubProject4 |>
 #normality test
 
 
-model  <- lm(`Spp Height` ~ `Species Code` + Plot, data = SubProject4)
+model  <- lm(`Spp Height` ~ Treatment +`Species Code`, data = SubProject4)
 plot(model)
 ggpubr::ggqqplot(residuals(model))
+#species code is the new block. 
 #test of normality
 #Subproject 4 data does not look normal from the residuals vs fitted graph. The residuals vs fitted graph shows heterscadisity. The qq plot does not show normal data.
 
@@ -140,6 +153,8 @@ ggplot(summary_stats) +
 model_lm <- lm(`Spp Height` ~ `Species Code` + Plot, SubProject4) 
 plot(model_lm)
 summary(model_lm)
+#Q - from amy : are the species that are the most abundanty also the tallest??
+
 #normality test
 #From the Residuals vs Fitted graph, it does not show homoscedasticity. The spread is not the same across the horizontal line on the graph. The qq plot also shows the data is not normal. 
 
@@ -168,5 +183,6 @@ lm +
 #figure
 #Some plots had more growth than other plots, that could be due to the species in the plot. If plots contained woody species, the species height is generally higher compared to a herbaceous species. 
 
+#check if residuals are normal 
 
 ```
