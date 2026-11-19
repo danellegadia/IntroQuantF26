@@ -152,23 +152,24 @@ You may be either examining `SPAD_Data_Raw`, `Height_Data_Raw`, `LICOR_Data_Raw`
 Height_cleaned <- Height_Data_Raw |> 
   drop_na(Seedling_Ht_cm, Block, Sapling_AB_etc, Treatment) |> 
   rename(Sapling = Sapling_AB_etc, 
-         Height = Seedling_Ht_cm) |> 
+         Height = Seedling_Ht_cm,
+         Survivorship = Dead_Alive) |> 
   mutate(Treatment_Plot = case_when(
     Treatment == "OA" ~ "OS",
-    is.character(Treatment) == TRUE ~ Treatment)) 
+    is.character(Treatment) == TRUE ~ Treatment))
 
 Height_cleaned |> 
-  mutate(Sapling = case_when(
+  mutate(Sapling_Type = case_when(
     Sapling == "A1" ~ "A",
     Sapling == "A2" ~ "B",
     Sapling == "A3" ~ "C", 
-    is.character(Sapling) == TRUE ~ Sapling))
+    is.character(Sapling) == TRUE ~ Sapling)) |> 
+  select(Sapling_Type, Height, Treatment_Plot, Survivorship)
 
 view(Height_cleaned)
-
-
 ```
 
+\
 In this next chunk, generate a cleaned data set following the example below. As you examine your raw data and find things to fix, add a #Note to create a list of things to fix up. You can then use pipes and write code to fix each thing in your checklist. This is also where if you identified `filters` or data computations in your Hypothesis worksheet (e.g., choose only one species), you can apply those.
 
 One specific thing you may need to do is JOIN two of the datasets, using common columns to match observations to each other. In the field, we recorded `Tag_Num`, `Seedling_AB_etc`, and `Block` as unique observations to identify trees across multiple datasets. Trees which were measured in multiple ways can be used to run a regression analysis.
@@ -179,7 +180,7 @@ Check out the illustrative animations on this page: <https://github.com/gadenbui
 
 ```{r}
 #anova analysis 
-aov <- aov(Height ~ Treatment, data = Height_cleaned)
+aov <- aov(Height ~ Treatment_Plot, data = Height_cleaned)
 summary(aov)
 
 #P-value is 0.749, this means I fail to reject the null hypothesis. The null hypothesis is that height would not differ between treatments. The alternative hypothesis is that the height will differ among different treatments. 
@@ -251,14 +252,16 @@ Go for it!
 ```{r}
 Height_cleaned |> 
   ggplot()+
-  aes(x = Treatment, y = Height)+
+  aes(x = Treatment_Plot, y = Height)+
   geom_boxplot()
-#I created this graph to show the relationship between treatment and height. The boxplot graph shows that the mean height for each of the treatments are similar, roughly 12 to 13. This graph shows that both of the OA and AC treatments have outliers. The AC treatment has a significantly smaller box, representing that there is less variability in the observations. I  chose a boxplot for this graphn to visualize the means, minimum, and maximum of each treatment. 
+#I created this graph to show the relationship between treatment and height. The boxplot graph shows that the mean height for each of the treatments are similar, roughly 12 to 13. This graph shows that both of the OS and AC treatments have outliers. The AC treatment has a significantly smaller box, representing that there is less variability in the observations. I  chose a boxplot for this graphn to visualize the means, minimum, and maximum of each treatment. 
 
 Height_cleaned |> 
   ggplot()+
-  aes(x = Sapling, y = Height)+
+  aes(x = Sapling_Type, y = Height)+
   geom_col()
+
+view(Height_cleaned)
 #I created this graph to show the relationship between Sapling and height. The histogram  shows that the NA sapling resulted in the most growth. These results show the inconsistency of the data collection and naming conventions. From the data alone, it's difficult to determine if A, A1, A2,A3 are the same sapling. Additionally, it's difficult to understand if the NA sapling was misnamed. Thus, I will not use Sapling as a variable in my data analysis. 
 
 #irissa notes - I'm confused about this graph. The letters were used as identifiers when there were multiple saplings under a tag number and thus there are multiple sapling As so what you've plotted along the x axis doesn't refer to unique individuals. NA would be when there was only 1 sapling in the ring and no letter identifier was needed.
