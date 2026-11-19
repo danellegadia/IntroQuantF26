@@ -164,7 +164,7 @@ Height_cleaned |>
     Sapling == "A2" ~ "B",
     Sapling == "A3" ~ "C", 
     is.character(Sapling) == TRUE ~ Sapling)) |> 
-  select(Sapling_Type, Height, Treatment_Plot, Survivorship)
+
 
 view(Height_cleaned)
 ```
