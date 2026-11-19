@@ -163,10 +163,7 @@ Height_cleaned |>
     Sapling == "A1" ~ "A",
     Sapling == "A2" ~ "B",
     Sapling == "A3" ~ "C", 
-    is.character(Sapling) == TRUE ~ Sapling)) |> 
-
-
-view(Height_cleaned)
+    is.character(Sapling) == TRUE ~ Sapling))
 ```
 
 \
