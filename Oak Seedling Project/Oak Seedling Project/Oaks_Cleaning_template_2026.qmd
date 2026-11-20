@@ -158,7 +158,7 @@ Height_cleaned <- Height_Data_Raw |>
     Treatment == "OA" ~ "OS",
     is.character(Treatment) == TRUE ~ Treatment))
 
-Height_cleaned |> 
+Height_cleaned <-Height_cleaned |> 
   mutate(Sapling_Type = case_when(
     Sapling == "A1" ~ "A",
     Sapling == "A2" ~ "B",
@@ -257,24 +257,18 @@ Height_cleaned |>
   ggplot()+
   aes(x = Sapling_Type, y = Height)+
   geom_col()
+#I created this graph to show the relationship between the different saplings and height. The column plot  shows that  A sapling resulted in the most growth, sapling B had the medium growth, and sapling C had the minimal amount of growth. 
 
-view(Height_cleaned)
-#I created this graph to show the relationship between Sapling and height. The histogram  shows that the NA sapling resulted in the most growth. These results show the inconsistency of the data collection and naming conventions. From the data alone, it's difficult to determine if A, A1, A2,A3 are the same sapling. Additionally, it's difficult to understand if the NA sapling was misnamed. Thus, I will not use Sapling as a variable in my data analysis. 
-
-#irissa notes - I'm confused about this graph. The letters were used as identifiers when there were multiple saplings under a tag number and thus there are multiple sapling As so what you've plotted along the x axis doesn't refer to unique individuals. NA would be when there was only 1 sapling in the ring and no letter identifier was needed.
-
-Height_Data |> 
-  ggplot()+
-  aes(x = Height)+
-  geom_histogram()+
-  facet_wrap(~Dead_Alive)
-#I created this graph because I was curious to see the relationship of dead or alive saplings. This graph shows that the NA value has a recorded height. Thus, I will have to do more data cleaning to include NA within the Alive data. 
-
-#irissa notes -You did an extra graph so I didn't take off a whole point but your dead vs. alive graph of seedling heights doesn't make ecological sense as dead seedlings all have a height of 0. Looking at blocks also doesn't mean much ecologically as they just served as replicates for us. Next time try to talk more about the trends you see in the data/figure rather than just the variables that the graph shows.
+Height_cleaned |> 
+  ggplot() +
+  aes(x = Treatment_Plot, y = Height) +
+  geom_boxplot() +
+  facet_wrap(~Sapling_Type)
+#I created this graph because I was curious to see the relationship of the two previous graphs. I wanted to visualize the relationships between sapling, treatment, and height. The results show that sapling C has the narrowest box, meaning the variation between each of the points is very small. The results also show that sapling A has the widest box in treatment DT, meaning that the range of height data points is wide. 
 
 
 
-Height_Data |> 
+Height_cleaned |> 
   ggplot()+
   aes(x = Height)+
   geom_histogram()+
@@ -282,7 +276,7 @@ Height_Data |>
 #I created this graph because I was curious to see if blocking affects the sapling height. During a field experiment, each block may be exposed to different environmental factors. Interestingly, each block has different heights. With this information, I will consider block in data analysis. 
 
 
-#My data analysis will work soleley with the Height Data because it is suitable for my questions and interests. Specifically, I will work with height, dead_alive, block, and treatment to understand the relationships that affect height of a plant.
+#My data analysis will work soleley with the Height Data because it is suitable for my questions and interests. Specifically, I will work with height, sapling, block, and treatment to understand the relationships that affect height of a plant.
   
  
 ```
